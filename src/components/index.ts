@@ -15,3 +15,4 @@ export { default as DiscoveryTimeline } from './DiscoveryTimeline';
 export { default as JourneyProgress } from './JourneyProgress';
 export { default as DiscoveryStage } from './DiscoveryStage';
 export { DiscoveryCard, OriginCard, HabitatCard, SpeciesCard } from './DiscoveryCards';
+export { default as GraphViewer } from './GraphViewer';

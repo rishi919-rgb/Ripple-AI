@@ -20,9 +20,6 @@ import {
 import { 
   ArrowRight, 
   Compass, 
-  ChevronRight, 
-  X, 
-  ShieldAlert, 
   Activity, 
   ArrowLeft,
   Sparkles,
@@ -35,7 +32,6 @@ export const Discovery: React.FC = () => {
   const navigate = useNavigate();
   const { currentExperiment } = useExperiment();
   const [stage, setStage] = useState(1);
-  const [showEngineModal, setShowEngineModal] = useState(false);
   const [journeyData, setJourneyData] = useState<StageDetails | null>(null);
 
   useEffect(() => {
@@ -75,7 +71,7 @@ export const Discovery: React.FC = () => {
         });
       }, 100);
     } else {
-      setShowEngineModal(true);
+      navigate('/control');
     }
   };
 
@@ -257,59 +253,6 @@ export const Discovery: React.FC = () => {
         </div>
 
       </div>
-
-      {/* Telemetry Modal disclaimer popup */}
-      {showEngineModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm transition-opacity duration-150">
-          <GlassPanel intensity="heavy" className="max-w-md w-full border border-border-muted p-6 space-y-6 relative shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <button 
-              onClick={() => setShowEngineModal(false)}
-              className="absolute top-4 right-4 p-1 text-text-muted hover:text-text-primary rounded-full hover:bg-bg-panel transition-colors cursor-pointer"
-              aria-label="Close modal"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-accent-indigo/10 border border-accent-indigo/20 text-accent-indigo rounded-lg">
-                <ShieldAlert className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold font-mono tracking-tight text-text-primary">
-                  Simulation Engine Offline
-                </h4>
-                <p className="text-[10px] font-mono text-accent-cyan">
-                  CODE: STG_4_ENGINE_PENDING
-                </p>
-              </div>
-            </div>
-
-            <p className="text-xs text-text-secondary leading-relaxed bg-bg-darkest/50 border border-border-subtle rounded-lg p-3">
-              The environmental simulation models, watershed run-off tables, biodiversity indices, and carbon/water footprint calculation engines are scheduled for compilation in **Sprint 4**. 
-            </p>
-
-            <div className="flex justify-end gap-3 pt-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setShowEngineModal(false)}
-                className="font-mono text-xs uppercase"
-              >
-                Close pad
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setShowEngineModal(false)}
-                className="font-mono text-xs uppercase gap-1"
-              >
-                <span>Acknowledge</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </Button>
-            </div>
-          </GlassPanel>
-        </div>
-      )}
     </PageContainer>
   );
 };

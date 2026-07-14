@@ -10,7 +10,8 @@ import {
   Notebook, 
   Settings,
   Workspace,
-  Discovery
+  Discovery,
+  Control
 } from '@/pages';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
             <Route path="/settings" element={<Settings />} />
             <Route path="/workspace" element={<Workspace />} />
             <Route path="/discovery" element={<Discovery />} />
+            <Route path="/control" element={<Control />} />
           </Routes>
         </AppLayout>
       </BrowserRouter>

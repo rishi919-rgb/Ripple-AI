@@ -7,3 +7,4 @@ export { default as Notebook } from './Notebook';
 export { default as Settings } from './Settings';
 export { default as Workspace } from './Workspace';
 export { default as Discovery } from './Discovery';
+export { default as Control } from './Control';
