@@ -1,0 +1,148 @@
+[
+  {
+    "id": "cit-wfn-rice",
+    "type": "Citation",
+    "version": "1.0.0",
+    "confidence": { "score": 1.0, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "title": "The green, blue and grey water footprint of crops and derived crop products",
+    "authors": ["Mekonnen, M.M.", "Hoekstra, A.Y."],
+    "journalOrPublisher": "Hydrology and Earth System Sciences",
+    "publicationYear": 2011,
+    "doi": "10.5194/hess-15-1577-2011",
+    "url": "https://waterfootprint.org/resources/Report47-WaterFootprintCrops.pdf",
+    "metadata": {
+      "accessDate": "2026-07-15",
+      "license": "CC-BY-3.0"
+    }
+  },
+  {
+    "id": "cit-icar-cauvery",
+    "type": "Citation",
+    "version": "1.0.0",
+    "confidence": { "score": 1.0, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "title": "Ecology and agricultural runoffs in Cauvery river basin",
+    "authors": ["Indian Council of Agricultural Research"],
+    "journalOrPublisher": "ICAR Technical Bulletin",
+    "publicationYear": 2018,
+    "url": "https://icar.org.in/content/ecology-cauvery-basin",
+    "metadata": {
+      "accessDate": "2026-07-15",
+      "license": "Public Domain"
+    }
+  },
+  {
+    "id": "cit-fao-millets",
+    "type": "Citation",
+    "version": "1.0.0",
+    "confidence": { "score": 1.0, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "title": "Millets and their environmental benefits - International Year of Millets 2023",
+    "authors": ["Food and Agriculture Organization"],
+    "journalOrPublisher": "FAO Reports",
+    "publicationYear": 2023,
+    "url": "https://www.fao.org/millets-2023/en/",
+    "metadata": {
+      "accessDate": "2026-07-15",
+      "license": "CC-BY-NC-SA-3.0"
+    }
+  },
+  {
+    "id": "cit-wri-soil",
+    "type": "Citation",
+    "version": "1.0.0",
+    "confidence": { "score": 1.0, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "title": "Restoring soil fertility through legume integration in Rajasthan drylands",
+    "authors": ["World Resources Institute"],
+    "journalOrPublisher": "WRI Working Papers",
+    "publicationYear": 2020,
+    "url": "https://wri.org/restoring-soil-fertility-rajasthan",
+    "metadata": {
+      "accessDate": "2026-07-15",
+      "license": "CC-BY-4.0"
+    }
+  },
+  {
+    "id": "cit-cgwb-punjab",
+    "type": "Citation",
+    "version": "1.0.0",
+    "confidence": { "score": 1.0, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "title": "Groundwater resource assessment of Punjab plains",
+    "authors": ["Central Ground Water Board India"],
+    "journalOrPublisher": "Ministry of Jal Shakti",
+    "publicationYear": 2021,
+    "url": "http://cgwb.gov.in/regions/punjab-reports.html",
+    "metadata": {
+      "accessDate": "2026-07-15",
+      "license": "Open Government License India"
+    }
+  },
+  {
+    "id": "cit-lca-dairy",
+    "type": "Citation",
+    "version": "1.0.0",
+    "confidence": { "score": 1.0, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "title": "Life cycle assessment of milk production systems in India",
+    "authors": ["Prasad, S.", "Singh, R."],
+    "journalOrPublisher": "Journal of Cleaner Production",
+    "publicationYear": 2019,
+    "doi": "10.1016/j.jclepro.2019.04.120",
+    "url": "https://sciencedirect.com/science/article/pii/S095965261931301X",
+    "metadata": {
+      "accessDate": "2026-07-15",
+      "license": "Elsevier User License"
+    }
+  },
+  {
+    "id": "cit-icar-tomato",
+    "type": "Citation",
+    "version": "1.0.0",
+    "confidence": { "score": 1.0, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "title": "Horticultural water use efficiency in Maharashtra",
+    "authors": ["Directorate of Onion and Garlic Research"],
+    "journalOrPublisher": "ICAR Annual Review",
+    "publicationYear": 2022,
+    "url": "https://icar.org.in/content/horticulture-water-use",
+    "metadata": {
+      "accessDate": "2026-07-15",
+      "license": "Public Domain"
+    }
+  },
+  {
+    "id": "cit-cgwb-ganga",
+    "type": "Citation",
+    "version": "1.0.0",
+    "confidence": { "score": 1.0, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "title": "Aquifer mapping and groundwater management in Ganga basin",
+    "authors": ["Central Ground Water Board India"],
+    "journalOrPublisher": "Ministry of Jal Shakti",
+    "publicationYear": 2020,
+    "url": "http://cgwb.gov.in/regions/ganga-aquifers.html",
+    "metadata": {
+      "accessDate": "2026-07-15",
+      "license": "Open Government License India"
+    }
+  }
+]

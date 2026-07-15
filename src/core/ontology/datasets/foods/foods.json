@@ -1,0 +1,102 @@
+[
+  {
+    "id": "food-veg-burger",
+    "type": "Food",
+    "version": "1.0.0",
+    "confidence": {
+      "score": 0.95,
+      "level": "High"
+    },
+    "provenance": {
+      "creator": "Ripple Scientific Curation Team",
+      "created": "2026-07-15T12:00:00Z",
+      "sourceSystem": "Ripple Curation Panel v1"
+    },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Veg Burger",
+    "description": "A vegetarian burger made with a wheat bun, a potato-based patty, and vegetable toppings.",
+    "category": "Prepared Meal",
+    "metadata": {}
+  },
+  {
+    "id": "food-millet-khichdi",
+    "type": "Food",
+    "version": "1.0.0",
+    "confidence": {
+      "score": 0.98,
+      "level": "High"
+    },
+    "provenance": {
+      "creator": "Ripple Scientific Curation Team",
+      "created": "2026-07-15T12:00:00Z",
+      "sourceSystem": "Ripple Curation Panel v1"
+    },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Millet Khichdi",
+    "description": "A nutritious and dryland-adapted porridge made of pearl millet (bajra) and green gram.",
+    "category": "Prepared Meal",
+    "metadata": {}
+  },
+  {
+    "id": "food-dosa",
+    "type": "Food",
+    "version": "1.0.0",
+    "confidence": {
+      "score": 0.98,
+      "level": "High"
+    },
+    "provenance": {
+      "creator": "Ripple Scientific Curation Team",
+      "created": "2026-07-15T12:00:00Z",
+      "sourceSystem": "Ripple Curation Panel v1"
+    },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Dosa",
+    "description": "A fermented crepe made from rice batter and black lentils, popular in South India.",
+    "category": "Prepared Meal",
+    "metadata": {}
+  },
+  {
+    "id": "food-rajma-chawal",
+    "type": "Food",
+    "version": "1.0.0",
+    "confidence": {
+      "score": 0.96,
+      "level": "High"
+    },
+    "provenance": {
+      "creator": "Ripple Scientific Curation Team",
+      "created": "2026-07-15T12:00:00Z",
+      "sourceSystem": "Ripple Curation Panel v1"
+    },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Rajma Chawal",
+    "description": "A popular North Indian dish consisting of red kidney beans in a thick gravy served with rice.",
+    "category": "Prepared Meal",
+    "metadata": {}
+  },
+  {
+    "id": "food-paneer-butter-masala",
+    "type": "Food",
+    "version": "1.0.0",
+    "confidence": {
+      "score": 0.95,
+      "level": "High"
+    },
+    "provenance": {
+      "creator": "Ripple Scientific Curation Team",
+      "created": "2026-07-15T12:00:00Z",
+      "sourceSystem": "Ripple Curation Panel v1"
+    },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Paneer Butter Masala",
+    "description": "A rich and creamy North Indian curry made with paneer (dairy cheese), tomatoes, cashews, and butter.",
+    "category": "Prepared Meal",
+    "metadata": {}
+  }
+]

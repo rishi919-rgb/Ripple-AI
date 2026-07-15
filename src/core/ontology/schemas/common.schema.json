@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ripple.ai/schemas/v1/common.schema.json",
+  "title": "RCDM Common Schema",
+  "definitions": {
+    "provenance": {
+      "type": "object",
+      "required": ["creator", "created", "sourceSystem"],
+      "properties": {
+        "creator": { "type": "string" },
+        "created": { "type": "string", "format": "date-time" },
+        "updated": { "type": "string", "format": "date-time" },
+        "sourceSystem": { "type": "string" },
+        "lineage": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "confidence": {
+      "type": "object",
+      "properties": {
+        "score": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "confidenceEntityId": { "type": "string" },
+        "level": { "type": "string", "enum": ["Low", "Medium", "High"] }
+      }
+    },
+    "coordinates": {
+      "type": "object",
+      "required": ["latitude", "longitude"],
+      "properties": {
+        "latitude": { "type": "number", "minimum": -90.0, "maximum": 90.0 },
+        "longitude": { "type": "number", "minimum": -180.0, "maximum": 180.0 },
+        "boundaryPolygon": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["latitude", "longitude"],
+            "properties": {
+              "latitude": { "type": "number", "minimum": -90.0, "maximum": 90.0 },
+              "longitude": { "type": "number", "minimum": -180.0, "maximum": 180.0 }
+            }
+          }
+        }
+      }
+    },
+    "reasoningStep": {
+      "type": "object",
+      "required": ["stepNumber", "summary"],
+      "properties": {
+        "stepNumber": { "type": "integer", "minimum": 1 },
+        "summary": { "type": "string" },
+        "detail": { "type": "string" }
+      }
+    },
+    "rcdmBase": {
+      "type": "object",
+      "required": ["id", "type", "version", "confidence", "provenance", "citations", "lastVerified"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string" },
+        "version": { "type": "string" },
+        "confidence": { "$ref": "#/definitions/confidence" },
+        "provenance": { "$ref": "#/definitions/provenance" },
+        "citations": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "lastVerified": { "type": "string", "format": "date-time" },
+        "notes": { "type": "string" },
+        "metadata": { "type": "object" }
+      }
+    }
+  }
+}

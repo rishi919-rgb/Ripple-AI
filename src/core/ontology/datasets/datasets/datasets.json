@@ -1,0 +1,24 @@
+[
+  {
+    "id": "dataset-rkb-v1",
+    "type": "Dataset",
+    "version": "1.0.0",
+    "confidence": {
+      "score": 1.0,
+      "level": "High"
+    },
+    "provenance": {
+      "creator": "Ripple Scientific Curation Team",
+      "created": "2026-07-15T12:00:00Z",
+      "sourceSystem": "Ripple Curation Panel v1"
+    },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Ripple Environmental Knowledge Base v1",
+    "description": "Curated environmental footprint and ecological impact data for core Indian food preparations.",
+    "license": "CC-BY-4.0",
+    "owner": "Ripple Environmental Science Team",
+    "recordCount": 65,
+    "metadata": {}
+  }
+]

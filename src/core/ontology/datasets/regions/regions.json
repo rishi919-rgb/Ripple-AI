@@ -1,0 +1,104 @@
+[
+  {
+    "id": "reg-up",
+    "type": "Region",
+    "version": "1.0.0",
+    "confidence": { "score": 0.98, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Indo-Gangetic Central Bed",
+    "country": "India",
+    "stateOrProvince": "Uttar Pradesh",
+    "coordinates": {
+      "latitude": 26.8467,
+      "longitude": 80.9462
+    },
+    "metadata": {}
+  },
+  {
+    "id": "reg-rajasthan",
+    "type": "Region",
+    "version": "1.0.0",
+    "confidence": { "score": 0.98, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Thar Arid Zone",
+    "country": "India",
+    "stateOrProvince": "Rajasthan",
+    "coordinates": {
+      "latitude": 27.0238,
+      "longitude": 74.2179
+    },
+    "metadata": {}
+  },
+  {
+    "id": "reg-karnataka",
+    "type": "Region",
+    "version": "1.0.0",
+    "confidence": { "score": 0.98, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Western Ghats Riparian Corridor",
+    "country": "India",
+    "stateOrProvince": "Karnataka",
+    "coordinates": {
+      "latitude": 15.3173,
+      "longitude": 75.7139
+    },
+    "metadata": {}
+  },
+  {
+    "id": "reg-punjab",
+    "type": "Region",
+    "version": "1.0.0",
+    "confidence": { "score": 0.98, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Punjab Flat Alluvium Grid",
+    "country": "India",
+    "stateOrProvince": "Punjab",
+    "coordinates": {
+      "latitude": 31.1471,
+      "longitude": 75.3412
+    },
+    "metadata": {}
+  },
+  {
+    "id": "reg-himachal",
+    "type": "Region",
+    "version": "1.0.0",
+    "confidence": { "score": 0.98, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Western Himalayan Valleys",
+    "country": "India",
+    "stateOrProvince": "Himachal Pradesh",
+    "coordinates": {
+      "latitude": 31.1048,
+      "longitude": 77.1734
+    },
+    "metadata": {}
+  },
+  {
+    "id": "reg-maharashtra",
+    "type": "Region",
+    "version": "1.0.0",
+    "confidence": { "score": 0.98, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Deccan Black Cotton Drylands",
+    "country": "India",
+    "stateOrProvince": "Maharashtra",
+    "coordinates": {
+      "latitude": 19.7515,
+      "longitude": 75.7139
+    },
+    "metadata": {}
+  }
+]

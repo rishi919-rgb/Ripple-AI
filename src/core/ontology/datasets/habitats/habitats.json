@@ -1,0 +1,54 @@
+[
+  {
+    "id": "hab-wetlands",
+    "type": "Habitat",
+    "version": "1.0.0",
+    "confidence": { "score": 0.98, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Wetlands",
+    "classification": "Indo-Gangetic Swampy Floodplains and Rice Paddies",
+    "ecologicalHealthScore": 0.65,
+    "metadata": {}
+  },
+  {
+    "id": "hab-grasslands",
+    "type": "Habitat",
+    "version": "1.0.0",
+    "confidence": { "score": 0.98, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Arid Grasslands",
+    "classification": "Thar Desert scrub and savannah grasslands",
+    "ecologicalHealthScore": 0.58,
+    "metadata": {}
+  },
+  {
+    "id": "hab-plains",
+    "type": "Habitat",
+    "version": "1.0.0",
+    "confidence": { "score": 0.98, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Agricultural Plains",
+    "classification": "Intensively cultivated plains and canal irrigation networks",
+    "ecologicalHealthScore": 0.45,
+    "metadata": {}
+  },
+  {
+    "id": "hab-forests",
+    "type": "Habitat",
+    "version": "1.0.0",
+    "confidence": { "score": 0.98, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Deciduous Forests",
+    "classification": "Western Ghats riparian forest buffers and catchment banks",
+    "ecologicalHealthScore": 0.78,
+    "metadata": {}
+  }
+]

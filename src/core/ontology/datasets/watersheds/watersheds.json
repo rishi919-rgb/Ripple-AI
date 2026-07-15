@@ -1,0 +1,72 @@
+[
+  {
+    "id": "ws-ganga",
+    "type": "Watershed",
+    "version": "1.0.0",
+    "confidence": { "score": 0.98, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Ganga Basin",
+    "riverSystem": "Ganga River System",
+    "basinAreaSqKm": 861452,
+    "dischargeRate": 16648,
+    "metadata": {}
+  },
+  {
+    "id": "ws-luni",
+    "type": "Watershed",
+    "version": "1.0.0",
+    "confidence": { "score": 0.98, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Luni Basin",
+    "riverSystem": "Luni River System",
+    "basinAreaSqKm": 37363,
+    "dischargeRate": 15,
+    "metadata": {}
+  },
+  {
+    "id": "ws-cauvery",
+    "type": "Watershed",
+    "version": "1.0.0",
+    "confidence": { "score": 0.98, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Cauvery Basin",
+    "riverSystem": "Cauvery River System",
+    "basinAreaSqKm": 81155,
+    "dischargeRate": 677,
+    "metadata": {}
+  },
+  {
+    "id": "ws-indus",
+    "type": "Watershed",
+    "version": "1.0.0",
+    "confidence": { "score": 0.98, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Indus Basin",
+    "riverSystem": "Indus River System",
+    "basinAreaSqKm": 321289,
+    "dischargeRate": 6600,
+    "metadata": {}
+  },
+  {
+    "id": "ws-godavari",
+    "type": "Watershed",
+    "version": "1.0.0",
+    "confidence": { "score": 0.98, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-15T12:00:00Z",
+    "name": "Godavari Basin",
+    "riverSystem": "Godavari River System",
+    "basinAreaSqKm": 312812,
+    "dischargeRate": 3061,
+    "metadata": {}
+  }
+]
