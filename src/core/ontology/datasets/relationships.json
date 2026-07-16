@@ -89,5 +89,55 @@
   { "id": "rel-83", "from": "ev-wheat-erosion", "to": "reg-up", "relationship": "observedIn", "version": "1.0.0" },
   { "id": "rel-84", "from": "ev-potato-water", "to": "reg-up", "relationship": "observedIn", "version": "1.0.0" },
   { "id": "rel-85", "from": "ev-wheat-erosion", "to": "cit-cgwb-ganga", "relationship": "references", "version": "1.0.0" },
-  { "id": "rel-86", "from": "ev-potato-water", "to": "cit-cgwb-ganga", "relationship": "references", "version": "1.0.0" }
+  { "id": "rel-86", "from": "ev-potato-water", "to": "cit-cgwb-ganga", "relationship": "references", "version": "1.0.0" },
+
+  { "id": "rel-87", "from": "sp-spot-billed-pelican", "to": "ev-pelican-threat", "relationship": "documentedBy", "version": "1.0.0" },
+  { "id": "rel-88", "from": "sp-great-indian-bustard", "to": "ev-bustard-threat", "relationship": "documentedBy", "version": "1.0.0" },
+  { "id": "rel-89", "from": "sp-blackbuck", "to": "ev-blackbuck-threat", "relationship": "documentedBy", "version": "1.0.0" },
+  { "id": "rel-90", "from": "sp-barn-owl", "to": "ev-owl-threat", "relationship": "documentedBy", "version": "1.0.0" },
+  { "id": "rel-91", "from": "sp-gangetic-dolphin", "to": "ev-dolphin-threat", "relationship": "documentedBy", "version": "1.0.0" },
+  { "id": "rel-92", "from": "sp-dwarf-bee", "to": "ev-bee-threat", "relationship": "documentedBy", "version": "1.0.0" },
+
+  { "id": "rel-93", "from": "ev-pelican-threat", "to": "cit-iucn-pelican", "relationship": "references", "version": "1.0.0" },
+  { "id": "rel-94", "from": "ev-bustard-threat", "to": "cit-iucn-bustard", "relationship": "references", "version": "1.0.0" },
+  { "id": "rel-95", "from": "ev-blackbuck-threat", "to": "cit-iucn-blackbuck", "relationship": "references", "version": "1.0.0" },
+  { "id": "rel-96", "from": "ev-owl-threat", "to": "cit-iucn-owl", "relationship": "references", "version": "1.0.0" },
+  { "id": "rel-97", "from": "ev-dolphin-threat", "to": "cit-iucn-dolphin", "relationship": "references", "version": "1.0.0" },
+  { "id": "rel-98", "from": "ev-bee-threat", "to": "cit-iucn-bee", "relationship": "references", "version": "1.0.0" },
+
+  { "id": "rel-99", "from": "dataset-rkb-v1", "to": "cit-iucn-pelican", "relationship": "contains", "version": "1.0.0" },
+  { "id": "rel-100", "from": "dataset-rkb-v1", "to": "cit-iucn-bustard", "relationship": "contains", "version": "1.0.0" },
+  { "id": "rel-101", "from": "dataset-rkb-v1", "to": "cit-iucn-blackbuck", "relationship": "contains", "version": "1.0.0" },
+  { "id": "rel-102", "from": "dataset-rkb-v1", "to": "cit-iucn-owl", "relationship": "contains", "version": "1.0.0" },
+  { "id": "rel-103", "from": "dataset-rkb-v1", "to": "cit-iucn-dolphin", "relationship": "contains", "version": "1.0.0" },
+  { "id": "rel-104", "from": "dataset-rkb-v1", "to": "cit-iucn-bee", "relationship": "contains", "version": "1.0.0" },
+  { "id": "rel-105", "from": "dataset-rkb-v1", "to": "cit-gbif-backbone", "relationship": "contains", "version": "1.0.0" },
+
+  { "id": "rel-106", "from": "dataset-rkb-v1", "to": "ev-pelican-threat", "relationship": "contains", "version": "1.0.0" },
+  { "id": "rel-107", "from": "dataset-rkb-v1", "to": "ev-bustard-threat", "relationship": "contains", "version": "1.0.0" },
+  { "id": "rel-108", "from": "dataset-rkb-v1", "to": "ev-blackbuck-threat", "relationship": "contains", "version": "1.0.0" },
+  { "id": "rel-109", "from": "dataset-rkb-v1", "to": "ev-owl-threat", "relationship": "contains", "version": "1.0.0" },
+  { "id": "rel-110", "from": "dataset-rkb-v1", "to": "ev-dolphin-threat", "relationship": "contains", "version": "1.0.0" },
+  { "id": "rel-111", "from": "dataset-rkb-v1", "to": "ev-bee-threat", "relationship": "contains", "version": "1.0.0" },
+
+  { "id": "rel-112", "from": "ws-ganga", "to": "ev-ganga-stress", "relationship": "documentedBy", "version": "1.0.0" },
+  { "id": "rel-113", "from": "ws-luni", "to": "ev-luni-stress", "relationship": "documentedBy", "version": "1.0.0" },
+  { "id": "rel-114", "from": "ws-cauvery", "to": "ev-cauvery-stress", "relationship": "documentedBy", "version": "1.0.0" },
+  { "id": "rel-115", "from": "ws-indus", "to": "ev-indus-stress", "relationship": "documentedBy", "version": "1.0.0" },
+  { "id": "rel-116", "from": "ws-godavari", "to": "ev-godavari-stress", "relationship": "documentedBy", "version": "1.0.0" },
+
+  { "id": "rel-117", "from": "ev-ganga-stress", "to": "cit-fao-aquastat-india", "relationship": "references", "version": "1.0.0" },
+  { "id": "rel-118", "from": "ev-luni-stress", "to": "cit-cgwb-groundwater", "relationship": "references", "version": "1.0.0" },
+  { "id": "rel-119", "from": "ev-cauvery-stress", "to": "cit-cgwb-groundwater", "relationship": "references", "version": "1.0.0" },
+  { "id": "rel-120", "from": "ev-indus-stress", "to": "cit-cgwb-groundwater", "relationship": "references", "version": "1.0.0" },
+  { "id": "rel-121", "from": "ev-godavari-stress", "to": "cit-fao-aquastat-india", "relationship": "references", "version": "1.0.0" },
+
+  { "id": "rel-122", "from": "dataset-rkb-v1", "to": "cit-cgwb-groundwater", "relationship": "contains", "version": "1.0.0" },
+  { "id": "rel-123", "from": "dataset-rkb-v1", "to": "cit-fao-aquastat-india", "relationship": "contains", "version": "1.0.0" },
+
+  { "id": "rel-124", "from": "dataset-rkb-v1", "to": "ev-ganga-stress", "relationship": "contains", "version": "1.0.0" },
+  { "id": "rel-125", "from": "dataset-rkb-v1", "to": "ev-luni-stress", "relationship": "contains", "version": "1.0.0" },
+  { "id": "rel-126", "from": "dataset-rkb-v1", "to": "ev-cauvery-stress", "relationship": "contains", "version": "1.0.0" },
+  { "id": "rel-127", "from": "dataset-rkb-v1", "to": "ev-indus-stress", "relationship": "contains", "version": "1.0.0" },
+  { "id": "rel-128", "from": "dataset-rkb-v1", "to": "ev-godavari-stress", "relationship": "contains", "version": "1.0.0" }
 ]

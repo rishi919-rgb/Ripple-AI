@@ -72,8 +72,8 @@ export class GraphMapper {
     builder.addWatershed(
       record.id,
       record.name,
-      { ...properties, riverSystem: record.riverSystem, areaSqKm: record.areaSqKm },
-      { source: 'hydrological_grids' }
+      { ...properties, riverSystem: record.riverSystem, areaSqKm: record.areaSqKm, stressIndex: record.stressIndex },
+      { source: 'hydrological_grids', metadata: record.metadata }
     );
   }
 
@@ -97,7 +97,7 @@ export class GraphMapper {
       record.id,
       record.name,
       { ...properties, scientificName: record.scientificName, role: record.role },
-      { status: record.status }
+      { status: record.status, metadata: (record as any).metadata }
     );
   }
 

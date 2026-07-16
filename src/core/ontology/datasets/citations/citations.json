@@ -144,5 +144,173 @@
       "accessDate": "2026-07-15",
       "license": "Open Government License India"
     }
+  },
+  {
+    "id": "cit-iucn-pelican",
+    "type": "Citation",
+    "version": "1.0.0",
+    "confidence": { "score": 1.0, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-16T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-16T12:00:00Z",
+    "title": "Pelecanus philippensis. The IUCN Red List of Threatened Species 2016",
+    "authors": ["BirdLife International"],
+    "journalOrPublisher": "IUCN Red List of Threatened Species",
+    "publicationYear": 2016,
+    "doi": "10.2305/IUCN.UK.2016-3.RLTS.T22697604A93623259.en",
+    "url": "https://www.iucnredlist.org/species/22697604/111818224",
+    "metadata": {
+      "accessDate": "2026-07-16",
+      "license": "CC-BY-4.0"
+    }
+  },
+  {
+    "id": "cit-iucn-bustard",
+    "type": "Citation",
+    "version": "1.0.0",
+    "confidence": { "score": 1.0, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-16T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-16T12:00:00Z",
+    "title": "Ardeotis nigriceps. The IUCN Red List of Threatened Species 2018",
+    "authors": ["BirdLife International"],
+    "journalOrPublisher": "IUCN Red List of Threatened Species",
+    "publicationYear": 2018,
+    "doi": "10.2305/IUCN.UK.2018-2.RLTS.T22691961A134188105.en",
+    "url": "https://www.iucnredlist.org/species/22691961/185449767",
+    "metadata": {
+      "accessDate": "2026-07-16",
+      "license": "CC-BY-4.0"
+    }
+  },
+  {
+    "id": "cit-iucn-blackbuck",
+    "type": "Citation",
+    "version": "1.0.0",
+    "confidence": { "score": 1.0, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-16T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-16T12:00:00Z",
+    "title": "Antilope cervicapra. The IUCN Red List of Threatened Species 2017",
+    "authors": ["IUCN SSC Antelope Specialist Group"],
+    "journalOrPublisher": "IUCN Red List of Threatened Species",
+    "publicationYear": 2017,
+    "doi": "10.2305/IUCN.UK.2017-2.RLTS.T1681A50193360.en",
+    "url": "https://www.iucnredlist.org/species/1681/115098432",
+    "metadata": {
+      "accessDate": "2026-07-16",
+      "license": "CC-BY-4.0"
+    }
+  },
+  {
+    "id": "cit-iucn-owl",
+    "type": "Citation",
+    "version": "1.0.0",
+    "confidence": { "score": 1.0, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-16T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-16T12:00:00Z",
+    "title": "Tyto alba. The IUCN Red List of Threatened Species 2019",
+    "authors": ["BirdLife International"],
+    "journalOrPublisher": "IUCN Red List of Threatened Species",
+    "publicationYear": 2019,
+    "doi": "10.2305/IUCN.UK.2019-3.RLTS.T22688504A155542941.en",
+    "url": "https://www.iucnredlist.org/species/22688504/155542941",
+    "metadata": {
+      "accessDate": "2026-07-16",
+      "license": "CC-BY-4.0"
+    }
+  },
+  {
+    "id": "cit-iucn-dolphin",
+    "type": "Citation",
+    "version": "1.0.0",
+    "confidence": { "score": 1.0, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-16T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-16T12:00:00Z",
+    "title": "Platanista gangetica. The IUCN Red List of Threatened Species 2022",
+    "authors": ["Braulik, G.T.", "Smith, B.D."],
+    "journalOrPublisher": "IUCN Red List of Threatened Species",
+    "publicationYear": 2022,
+    "doi": "10.2305/IUCN.UK.2022-1.RLTS.T17570A503599.en",
+    "url": "https://www.iucnredlist.org/species/17570/503599",
+    "metadata": {
+      "accessDate": "2026-07-16",
+      "license": "CC-BY-4.0"
+    }
+  },
+  {
+    "id": "cit-iucn-bee",
+    "type": "Citation",
+    "version": "1.0.0",
+    "confidence": { "score": 1.0, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-16T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-16T12:00:00Z",
+    "title": "Apis florea. The IUCN Red List of Threatened Species 2024",
+    "authors": ["Lopuch, S.", "Patil, R."],
+    "journalOrPublisher": "IUCN Red List of Threatened Species",
+    "publicationYear": 2024,
+    "url": "https://www.iucnredlist.org/species/19414322/45124962",
+    "metadata": {
+      "accessDate": "2026-07-16",
+      "license": "CC-BY-4.0"
+    }
+  },
+  {
+    "id": "cit-gbif-backbone",
+    "type": "Citation",
+    "version": "1.0.0",
+    "confidence": { "score": 1.0, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-16T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-16T12:00:00Z",
+    "title": "GBIF Backbone Taxonomy. GBIF Secretariat",
+    "authors": ["GBIF Secretariat"],
+    "journalOrPublisher": "GBIF Backbone Taxonomy",
+    "publicationYear": 2025,
+    "doi": "10.15468/39omei",
+    "url": "https://www.gbif.org",
+    "metadata": {
+      "accessDate": "2026-07-16",
+      "license": "CC-BY-4.0"
+    }
+  },
+  {
+    "id": "cit-cgwb-groundwater",
+    "type": "Citation",
+    "version": "1.0.0",
+    "confidence": { "score": 1.0, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-16T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-16T12:00:00Z",
+    "title": "National Compilation on Dynamic Ground Water Resources of India, 2023",
+    "authors": ["Central Ground Water Board"],
+    "journalOrPublisher": "Ministry of Jal Shakti, Government of India",
+    "publicationYear": 2023,
+    "url": "http://cgwb.gov.in/documents/2023-GW-Assessment.pdf",
+    "metadata": {
+      "accessDate": "2026-07-16",
+      "license": "Open Government License India"
+    }
+  },
+  {
+    "id": "cit-fao-aquastat-india",
+    "type": "Citation",
+    "version": "1.0.0",
+    "confidence": { "score": 1.0, "level": "High" },
+    "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-16T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
+    "citations": [],
+    "lastVerified": "2026-07-16T12:00:00Z",
+    "title": "AQUASTAT Country Profile - India",
+    "authors": ["Food and Agriculture Organization"],
+    "journalOrPublisher": "FAO AQUASTAT Reports",
+    "publicationYear": 2022,
+    "url": "https://www.fao.org/aquastat/en/countries-and-basins/country-profiles/country/IND",
+    "metadata": {
+      "accessDate": "2026-07-16",
+      "license": "CC-BY-NC-SA-3.0"
+    }
   }
 ]

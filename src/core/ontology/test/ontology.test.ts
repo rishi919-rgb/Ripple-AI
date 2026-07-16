@@ -1,5 +1,5 @@
 import { validateEntity, validateRelationship, validateGraph } from '../validationUtils';
-import { RCDMEntity, RCDMRelationship } from '../types';
+import type { RCDMEntity, RCDMRelationship } from '../types';
 
 function runTests() {
   console.log('==================================================');

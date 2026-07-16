@@ -1,4 +1,4 @@
-import { RCDMEntity, RCDMRelationship, RCDMEntityType } from './types';
+import type { RCDMEntity, RCDMRelationship, RCDMEntityType } from './types';
 import { isRelationshipAllowed, SEMANTIC_CONSTRAINTS } from './validationRules';
 import { SCHEMAS } from './schemas';
 
@@ -178,8 +178,26 @@ export function validateEntity(entity: any): ValidationReport {
       if (typeof entity.riverSystem !== 'string' || entity.riverSystem.trim() === '') {
         errors.push({ path: 'riverSystem', message: 'Watershed riverSystem must be a non-empty string', errorCode: 'MISSING_FIELD' });
       }
-      if (entity.basinAreaSqKm !== undefined && (typeof entity.basinAreaSqKm !== 'number' || entity.basinAreaSqKm < 0)) {
-        errors.push({ path: 'basinAreaSqKm', message: 'basinAreaSqKm must be a non-negative number', errorCode: 'INVALID_TYPE' });
+      if (entity.basinAreaSqKm !== undefined && entity.basinAreaSqKm !== null) {
+        if (typeof entity.basinAreaSqKm !== 'number' || entity.basinAreaSqKm <= 0) {
+          errors.push({ path: 'basinAreaSqKm', message: 'basinAreaSqKm must be a positive number', errorCode: 'INVALID_BASIN_AREA' });
+        }
+      }
+      const stressIndex = entity.metadata?.stressIndex;
+      if (stressIndex !== undefined && stressIndex !== null) {
+        if (typeof stressIndex !== 'number' || stressIndex < 0 || stressIndex > 1) {
+          errors.push({ path: 'metadata.stressIndex', message: 'stressIndex must be a number between 0 and 1', errorCode: 'INVALID_STRESS_INDEX' });
+        }
+      }
+      const rainfall = entity.metadata?.averageAnnualRainfall;
+      if (rainfall !== undefined && rainfall !== null) {
+        if (typeof rainfall !== 'number' || rainfall <= 0) {
+          errors.push({ path: 'metadata.averageAnnualRainfall', message: 'averageAnnualRainfall must be a positive number', errorCode: 'INVALID_RAINFALL' });
+        }
+      }
+      const sourceDataset = entity.metadata?.sourceDataset;
+      if (sourceDataset === undefined || sourceDataset === null || typeof sourceDataset !== 'string' || sourceDataset.trim() === '') {
+        errors.push({ path: 'metadata.sourceDataset', message: 'sourceDataset is required', errorCode: 'MISSING_SOURCE_DATASET' });
       }
       break;
 
@@ -201,12 +219,43 @@ export function validateEntity(entity: any): ValidationReport {
       if (typeof entity.name !== 'string' || entity.name.trim() === '') {
         errors.push({ path: 'name', message: 'Species name must be a non-empty string', errorCode: 'MISSING_FIELD' });
       }
-      if (typeof entity.scientificName !== 'string' || entity.scientificName.trim() === '') {
-        errors.push({ path: 'scientificName', message: 'Species scientificName must be a non-empty string', errorCode: 'MISSING_FIELD' });
+      if (entity.scientificName === undefined || entity.scientificName === null || typeof entity.scientificName !== 'string' || entity.scientificName.trim() === '') {
+        warnings.push(`Species '${entity.id || 'unknown'}' is missing a scientificName.`);
       }
       const validStatuses = ['Critically Endangered', 'Endangered', 'Vulnerable', 'Near Threatened', 'Least Concern', 'Data Deficient'];
-      if (!validStatuses.includes(entity.conservationStatus)) {
-        errors.push({ path: 'conservationStatus', message: `conservationStatus must be one of: ${validStatuses.join(', ')}`, errorCode: 'INVALID_ENUM_VALUE' });
+      if (entity.conservationStatus === undefined || entity.conservationStatus === null || !validStatuses.includes(entity.conservationStatus)) {
+        warnings.push(`Species '${entity.id || 'unknown'}' is missing a valid conservationStatus.`);
+      }
+      if (entity.metadata) {
+        if (entity.metadata.gbifKey !== undefined && entity.metadata.gbifKey !== null) {
+          const key = entity.metadata.gbifKey;
+          const isInteger = Number.isInteger(key);
+          const isNumericString = typeof key === 'string' && /^\d+$/.test(key);
+          const val = isInteger ? key : (isNumericString ? parseInt(key, 10) : -1);
+          if (val <= 0) {
+            errors.push({
+              path: 'metadata.gbifKey',
+              message: `Species '${entity.id}' has an invalid GBIF ID: ${key}`,
+              errorCode: 'INVALID_GBIF_ID'
+            });
+          }
+        }
+        if (entity.metadata.iucnUrl !== undefined && entity.metadata.iucnUrl !== null) {
+          const url = entity.metadata.iucnUrl;
+          let isUrlValid = true;
+          try {
+            new URL(url);
+          } catch (e) {
+            isUrlValid = false;
+          }
+          if (!isUrlValid || typeof url !== 'string' || !url.startsWith('https://www.iucnredlist.org/')) {
+            errors.push({
+              path: 'metadata.iucnUrl',
+              message: `Species '${entity.id}' has a malformed IUCN URL: ${url}`,
+              errorCode: 'INVALID_IUCN_URL'
+            });
+          }
+        }
       }
       break;
 

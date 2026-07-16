@@ -5,13 +5,28 @@
     "version": "1.0.0",
     "confidence": { "score": 0.98, "level": "High" },
     "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
-    "citations": [],
-    "lastVerified": "2026-07-15T12:00:00Z",
+    "citations": ["cit-cgwb-ganga"],
+    "lastVerified": "2026-07-16T12:00:00Z",
     "name": "Ganga Basin",
     "riverSystem": "Ganga River System",
     "basinAreaSqKm": 861452,
     "dischargeRate": 16648,
-    "metadata": {}
+    "metadata": {
+      "statesCovered": ["Uttarakhand", "Uttar Pradesh", "Bihar", "West Bengal", "Delhi", "Haryana", "Himachal Pradesh", "Rajasthan", "Madhya Pradesh", "Chhattisgarh", "Jharkhand"],
+      "averageAnnualRainfall": 1050,
+      "stressIndex": 0.78,
+      "stressCategory": "High",
+      "stressSource": "Agricultural irrigation withdrawals, municipal consumption, and industrial effluent.",
+      "ecologicalImportance": "Supports over 140 fish species, 90 amphibian species, and the Endangered Gangetic Dolphin.",
+      "dominantLandUse": "Agriculture (crop cultivation represents >70% of basin area)",
+      "protectedAreas": ["Sundarbans National Park", "Jim Corbett National Park", "Rajaji National Park"],
+      "representativeHabitats": ["hab-plains", "hab-wetlands"],
+      "representativeSpecies": ["sp-gangetic-dolphin", "sp-barn-owl"],
+      "primaryThreats": "Over-extraction of water, pollution from agricultural runoff (pesticides, fertilizers), and untreated municipal sewage.",
+      "seasonalVariation": "Monsoon peak flows (July-September) account for over 80% of annual runoff, followed by severe dry-season low flows.",
+      "sourceDataset": "dataset-rkb-v1",
+      "lastUpdated": "2026-07-16T12:00:00Z"
+    }
   },
   {
     "id": "ws-luni",
@@ -20,12 +35,27 @@
     "confidence": { "score": 0.98, "level": "High" },
     "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
     "citations": [],
-    "lastVerified": "2026-07-15T12:00:00Z",
+    "lastVerified": "2026-07-16T12:00:00Z",
     "name": "Luni Basin",
     "riverSystem": "Luni River System",
     "basinAreaSqKm": 37363,
     "dischargeRate": 15,
-    "metadata": {}
+    "metadata": {
+      "statesCovered": ["Rajasthan", "Gujarat"],
+      "averageAnnualRainfall": 350,
+      "stressIndex": 0.92,
+      "stressCategory": "Critical",
+      "stressSource": "Hyper-arid climate, high groundwater abstraction, and textile dyeing industrial discharges.",
+      "ecologicalImportance": "Key ephemeral river system supporting desert biodiversity and migrating waterfowl in the Rann of Kutch.",
+      "dominantLandUse": "Pastoral grazing, rainfed agriculture, and wasteland.",
+      "protectedAreas": ["Desert National Park", "Tal Chhapar Sanctuary"],
+      "representativeHabitats": ["hab-grasslands"],
+      "representativeSpecies": ["sp-great-indian-bustard", "sp-blackbuck"],
+      "primaryThreats": "Desertification, severe water scarcity, and industrial pollution from textile clusters.",
+      "seasonalVariation": "Highly ephemeral; flows only during brief monsoon showers, remaining dry for most of the year.",
+      "sourceDataset": "dataset-rkb-v1",
+      "lastUpdated": "2026-07-16T12:00:00Z"
+    }
   },
   {
     "id": "ws-cauvery",
@@ -33,13 +63,28 @@
     "version": "1.0.0",
     "confidence": { "score": 0.98, "level": "High" },
     "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
-    "citations": [],
-    "lastVerified": "2026-07-15T12:00:00Z",
+    "citations": ["cit-icar-cauvery"],
+    "lastVerified": "2026-07-16T12:00:00Z",
     "name": "Cauvery Basin",
     "riverSystem": "Cauvery River System",
     "basinAreaSqKm": 81155,
     "dischargeRate": 677,
-    "metadata": {}
+    "metadata": {
+      "statesCovered": ["Karnataka", "Tamil Nadu", "Kerala", "Puducherry"],
+      "averageAnnualRainfall": 1075,
+      "stressIndex": 0.85,
+      "stressCategory": "High",
+      "stressSource": "Intensive paddy and sugarcane irrigation, municipal water drafts for major cities like Bengaluru.",
+      "ecologicalImportance": "Critical corridor linking Western Ghats and Eastern Ghats, supporting rich riparian forests and endemic species.",
+      "dominantLandUse": "Agricultural crop cultivation, agroforestry, and riparian forests.",
+      "protectedAreas": ["Bandipur National Park", "Nagarhole National Park", "Cauvery Wildlife Sanctuary"],
+      "representativeHabitats": ["hab-wetlands", "hab-forests"],
+      "representativeSpecies": ["sp-spot-billed-pelican"],
+      "primaryThreats": "Inter-state water sharing conflicts, agricultural runoff, and catchment forest deforestation.",
+      "seasonalVariation": "Regulated heavily by dams; experiences southwest monsoon (June-September) and northeast monsoon (October-December) replenishment.",
+      "sourceDataset": "dataset-rkb-v1",
+      "lastUpdated": "2026-07-16T12:00:00Z"
+    }
   },
   {
     "id": "ws-indus",
@@ -48,12 +93,27 @@
     "confidence": { "score": 0.98, "level": "High" },
     "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
     "citations": [],
-    "lastVerified": "2026-07-15T12:00:00Z",
+    "lastVerified": "2026-07-16T12:00:00Z",
     "name": "Indus Basin",
     "riverSystem": "Indus River System",
     "basinAreaSqKm": 321289,
     "dischargeRate": 6600,
-    "metadata": {}
+    "metadata": {
+      "statesCovered": ["Jammu & Kashmir", "Himachal Pradesh", "Punjab", "Haryana", "Rajasthan"],
+      "averageAnnualRainfall": 650,
+      "stressIndex": 0.88,
+      "stressCategory": "High",
+      "stressSource": "Massive canal irrigation network in Punjab (Green Revolution crop belt) and transboundary drafts.",
+      "ecologicalImportance": "Supports dense riverine wetlands and agricultural plains critical for migratory flyways.",
+      "dominantLandUse": "Intensive agricultural crop cultivation (>75% land cover in Punjab plains)",
+      "protectedAreas": ["Harike Wetland", "Kanjli Wetland"],
+      "representativeHabitats": ["hab-plains"],
+      "representativeSpecies": ["sp-barn-owl"],
+      "primaryThreats": "Groundwater over-exploitation, soil salinity, and heavy chemical pesticide runoff.",
+      "seasonalVariation": "Glacial meltwaters drive high spring/summer flows, supplemented by monsoon rainfall, while winters are dry.",
+      "sourceDataset": "dataset-rkb-v1",
+      "lastUpdated": "2026-07-16T12:00:00Z"
+    }
   },
   {
     "id": "ws-godavari",
@@ -62,11 +122,26 @@
     "confidence": { "score": 0.98, "level": "High" },
     "provenance": { "creator": "Ripple Scientific Curation Team", "created": "2026-07-15T12:00:00Z", "sourceSystem": "Ripple Curation Panel v1" },
     "citations": [],
-    "lastVerified": "2026-07-15T12:00:00Z",
+    "lastVerified": "2026-07-16T12:00:00Z",
     "name": "Godavari Basin",
     "riverSystem": "Godavari River System",
     "basinAreaSqKm": 312812,
     "dischargeRate": 3061,
-    "metadata": {}
+    "metadata": {
+      "statesCovered": ["Maharashtra", "Telangana", "Andhra Pradesh", "Chhattisgarh", "Madhya Pradesh", "Odisha", "Karnataka"],
+      "averageAnnualRainfall": 1100,
+      "stressIndex": 0.65,
+      "stressCategory": "Medium-High",
+      "stressSource": "Agricultural abstractions, industrial clusters in Maharashtra, and coal mining discharge.",
+      "ecologicalImportance": "Supports rich tropical dry deciduous forests and provides deltaic breeding grounds for marine and freshwater species.",
+      "dominantLandUse": "Agriculture, dry deciduous forestry, and coal mining areas.",
+      "protectedAreas": ["Papikonda National Park", "Indravati National Park", "Kanger Ghati National Park"],
+      "representativeHabitats": ["hab-forests"],
+      "representativeSpecies": ["sp-dwarf-bee"],
+      "primaryThreats": "Forest clearing for agricultural expansion, damming of river tributaries, and industrial mining runoff.",
+      "seasonalVariation": "Highly monsoonal; experiences extreme floods during June-September and very low flows during winter and summer.",
+      "sourceDataset": "dataset-rkb-v1",
+      "lastUpdated": "2026-07-16T12:00:00Z"
+    }
   }
 ]

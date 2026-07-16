@@ -48,6 +48,8 @@ export interface WatershedRecord {
   riverSystem: string;
   areaSqKm: string;
   habitats: string[]; // Habitat node IDs
+  stressIndex: number; // Expose stressIndex
+  metadata?: Record<string, any>;
 }
 
 /**

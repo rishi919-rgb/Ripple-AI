@@ -3,7 +3,7 @@ import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { validateEntity } from '../validationUtils';
 import { isRelationshipAllowed } from '../validationRules';
-import { RCDMEntity, RCDMRelationship } from '../types';
+import type { RCDMEntity, RCDMRelationship } from '../types';
 
 // For ES modules path resolution
 const __filename = fileURLToPath(import.meta.url);
@@ -88,6 +88,11 @@ function runRkbValidation() {
       isValid = false;
       report.errors.forEach(err => {
         errors.push(`[SCHEMA] Entity '${entity.id}' (${entity.type}) failed schema validation at field '${err.path}': ${err.message}`);
+      });
+    }
+    if (report.warnings) {
+      report.warnings.forEach(warn => {
+        warnings.push(`[SCHEMA_WARNING] Entity '${entity.id}': ${warn}`);
       });
     }
 

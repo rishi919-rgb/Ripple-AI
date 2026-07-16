@@ -1,4 +1,4 @@
-import { RCDMEntityType, RelationshipType } from './types';
+import type { RCDMEntityType, RelationshipType } from './types';
 
 /**
  * Interface defining a valid source-target configuration for a relationship.
