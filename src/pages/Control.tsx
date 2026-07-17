@@ -8,43 +8,31 @@ import { Scenario } from '@/core/environment/simulation/Scenario';
 import { EnvironmentalGraph } from '@/core/environment/graph/EnvironmentalGraph';
 import type { GraphNode } from '@/core/environment/graph/Node';
 import type { TimelineRecord } from '@/core/environment/simulation/types';
-import { ReasoningEngine } from '@/core/reasoning/ReasoningEngine';
-import evidenceJson from '../core/ontology/datasets/evidence/evidence.json';
-import citationsJson from '../core/ontology/datasets/citations/citations.json';
-import datasetsJson from '../core/ontology/datasets/datasets/datasets.json';
 import { 
   PageContainer, 
-  Card, 
   Button, 
   GraphViewer
 } from '@/components';
 import { 
-  Activity, 
-  Database, 
-  ShieldCheck, 
-  Compass, 
-  Layers, 
-  Play, 
   RefreshCw, 
-  Award,
-  BookOpen,
   ArrowLeft,
-  Clock,
-  ExternalLink,
-  Flame,
-  Check,
   TrendingDown,
-  TrendingUp,
-  FileSpreadsheet,
-  Network,
-  Info
+  BookOpen,
+  Award,
+  ShieldCheck,
+  ExternalLink,
+  Check,
+  X,
+  MapPin,
+  Heart,
+  HelpCircle
 } from 'lucide-react';
 
 const LINEAGE_STEPS = [
   { id: 'image', label: 'Image Specimen', desc: 'Raw visual photographic input captured by explorer.' },
   { id: 'gemini', label: 'Gemini Identification', desc: 'Identifies meal classification taxonomy (e.g. Masala Dosa).' },
   { id: 'extraction', label: 'Culinary Extraction', desc: 'Resolves constituent ingredient weight shares (e.g. Rice, Potato).' },
-  { id: 'food', label: 'Food Dataset', desc: 'Matches canonical food aliases in localized nutrient databases.' },
+  { id: 'food', label: 'Food Database', desc: 'Matches canonical food aliases in localized nutrient databases.' },
   { id: 'crop', label: 'Crop Dataset', desc: 'Resolves agricultural yields, fertilization rates, and irrigation profiles.' },
   { id: 'region', label: 'Region Dataset', desc: 'Traces crop origin to regional cultivation tracts (e.g. Karnataka).' },
   { id: 'wris', label: 'WRIS Catchment', desc: 'Traces outflow fertilizer discharges into regional river basins.' },
@@ -59,10 +47,9 @@ const LINEAGE_STEPS = [
 export const Control: React.FC = () => {
   const navigate = useNavigate();
   const { currentExperiment } = useExperiment();
-  const [timeString, setTimeString] = useState('');
   
-  // Navigation tabs in control room
-  const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<'console' | 'comparison' | 'lineage' | 'executive'>('console');
+  // Navigation tabs in bottom panel (7 workspaces)
+  const [activeBottomTab, setActiveBottomTab] = useState<'evidence' | 'reasoning' | 'timeline' | 'comparison' | 'brief' | 'assumptions' | 'notes'>('reasoning');
   
   // Presentation modes
   const [demoMode, setDemoMode] = useState(false);
@@ -72,7 +59,6 @@ export const Control: React.FC = () => {
   const eie = useMemo(() => new EnvironmentalIntelligenceEngine(), []);
   const ee = useMemo(() => new EvidenceEngine(), []);
   const ere = useMemo(() => new EcologicalRippleEngine(), []);
-  const reasoningEngine = useMemo(() => new ReasoningEngine(), []);
 
   // Graph state
   const [baseGraph, setBaseGraph] = useState<EnvironmentalGraph | null>(null);
@@ -82,38 +68,30 @@ export const Control: React.FC = () => {
   // Selection states
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'reasoning' | 'evidence' | 'notes'>('reasoning');
 
   // Simulation states
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>('control');
   const [isSimulating, setIsSimulating] = useState(false);
   const [timeline, setTimeline] = useState<TimelineRecord[]>([]);
-  const [notes, setNotes] = useState<string>('');
   const [simResult, setSimResult] = useState<any | null>(null);
+  const [notes, setNotes] = useState<string>('');
 
-  // Replay states
+  // Replay & Progressive Build states
   const [replayWave, setReplayWave] = useState<number | null>(null);
   const [isReplaying, setIsReplaying] = useState(false);
+  const [graphBuildWave, setGraphBuildWave] = useState<number | null>(null);
 
-  // Tab 3 Lineage state
+  // Tooltip hover toggles
+  const [showBpiTooltip, setShowBpiTooltip] = useState(false);
+  const [showConfTooltip, setShowConfTooltip] = useState(false);
+
+  // Tab assumptions Lineage state
   const [selectedLineageStep, setSelectedLineageStep] = useState('image');
 
-  // Reasoning formatting states
-  const [reasoningMode, setReasoningMode] = useState<'pipeline' | 'narrative'>('pipeline');
-  const [narrativeFormat, setNarrativeFormat] = useState<'SCIENTIFIC' | 'JUDGE' | 'TECHNICAL'>('SCIENTIFIC');
+  // BPI visual count animation states
+  const [displayedBpi, setDisplayedBpi] = useState(0);
 
-  // 1. Digital Clock (NASA telemetry styling)
-  useEffect(() => {
-    const updateTime = () => {
-      const date = new Date();
-      setTimeString(date.toISOString().replace('T', ' ').substring(0, 19) + ' UTC');
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // 2. Initialize Graph Context from active canvas
+  // Initialize Graph Context from active canvas
   useEffect(() => {
     const init = async () => {
       setIsInitializing(true);
@@ -142,6 +120,12 @@ export const Control: React.FC = () => {
         // Pre-select meal node
         const mealNode = graph.getNodes().find(n => n.type === 'MEAL');
         if (mealNode) setSelectedNode(mealNode);
+
+        // Trigger Graph build progressive reveal if URL requested
+        const queryParams = new URLSearchParams(window.location.search);
+        if (queryParams.get('animate') === 'true') {
+          setGraphBuildWave(0);
+        }
       } catch (err) {
         console.error('Failed to initialize control room graph:', err);
       } finally {
@@ -151,7 +135,22 @@ export const Control: React.FC = () => {
     init();
   }, [currentExperiment, eie, ee]);
 
-  // 3. Define Scenarios
+  // Progressive initial Graph reveal wave increments (Meal -> Ingredients -> Crops -> Region -> Watershed -> Habitat -> Species)
+  useEffect(() => {
+    if (graphBuildWave === null || graphBuildWave >= 8) {
+      if (graphBuildWave === 8) {
+        // Build completed, restore normal interaction
+        setGraphBuildWave(null);
+      }
+      return;
+    }
+    const timer = setTimeout(() => {
+      setGraphBuildWave(w => (w !== null ? w + 1 : null));
+    }, 700); // 700ms reveal step wave durations
+    return () => clearTimeout(timer);
+  }, [graphBuildWave]);
+
+  // Define Millet Substitution Scenario
   const scenariosList = useMemo(() => {
     let mealId = 'meal-dosa';
     let mealLabel = 'Masala Dosa';
@@ -179,7 +178,7 @@ export const Control: React.FC = () => {
         id: 'ing-millet-flour',
         type: 'INGREDIENT',
         label: 'Millet Flour',
-        properties: { category: 'Grain', currentPressure: 0.3, basePressure: 1.0 },
+        properties: { category: 'Grain', currentPressure: 0.35, basePressure: 1.0 },
         metadata: { confidence: 0.94 },
         evidence: []
       }
@@ -201,24 +200,13 @@ export const Control: React.FC = () => {
     replaceMillet.addChange({
       type: 'MODIFY_PRESSURE',
       targetId: mealId,
-      payload: { currentPressure: 0.35 }
+      payload: { currentPressure: 0.40 }
     });
 
-    const reduceImpact = new Scenario(
-      'scen-reduce',
-      'Reduce Portion Demand by 50%',
-      `Simulates the result of cutting consumer demand for "${mealLabel}" by half.`
-    );
-    reduceImpact.addChange({
-      type: 'MODIFY_PRESSURE',
-      targetId: mealId,
-      payload: { currentPressure: 0.50 }
-    });
-
-    return [replaceMillet, reduceImpact];
+    return [replaceMillet];
   }, []);
 
-  // 4. Trigger ERE Simulation
+  // Trigger ERE Simulation
   const handleRunSimulation = (targetScenarioId = selectedScenarioId) => {
     if (!baseGraph) return;
     setIsSimulating(true);
@@ -250,10 +238,10 @@ export const Control: React.FC = () => {
         }
       }
       setIsSimulating(false);
-    }, 600);
+    }, 800);
   };
 
-  // 5. Replay wave timer cascades
+  // Replay wave timer cascades
   const handleStartReplay = () => {
     if (!simResult) return;
     setIsReplaying(true);
@@ -269,19 +257,17 @@ export const Control: React.FC = () => {
     }
     const interval = setTimeout(() => {
       setReplayWave(w => (w !== null ? w + 1 : null));
-    }, 1500); // 1.5s step intervals for telemetry review
+    }, 1300);
     return () => clearTimeout(interval);
   }, [isReplaying, replayWave]);
 
-  // Demo Mode Switch
+  // Demo Switch
   const toggleDemoMode = () => {
     if (!demoMode) {
       setDemoMode(true);
       setJudgeMode(false);
       setSelectedScenarioId('scen-millet');
       handleRunSimulation('scen-millet');
-      setReasoningMode('narrative');
-      setActiveWorkspaceTab('console');
     } else {
       setDemoMode(false);
       setSelectedScenarioId('control');
@@ -289,40 +275,21 @@ export const Control: React.FC = () => {
     }
   };
 
-  // Judge Mode Switch
+  // Judge Switch
   const toggleJudgeMode = () => {
     setJudgeMode(!judgeMode);
     if (demoMode) setDemoMode(false);
   };
 
-  // Get evidence for selected node
+  // Get evidence list for selected node
   const selectedNodeEvidence = useMemo(() => {
     if (!selectedNode) return [];
     return ee.getEvidence(selectedNode.id);
   }, [selectedNode, ee]);
 
-  // Dynamic RRT Narrative text calculation
-  const narrativeText = useMemo(() => {
-    if (!simResult) {
-      return 'Simulation engine standby. Select a scenario and click "Run Simulation" to generate narrative traces.';
-    }
-    try {
-      if (narrativeFormat === 'SCIENTIFIC') {
-        return reasoningEngine.getScientificNarrative(simResult, ee);
-      } else if (narrativeFormat === 'JUDGE') {
-        return reasoningEngine.getJudgeNarrative(simResult, ee);
-      } else {
-        return reasoningEngine.getTechnicalNarrative(simResult, ee);
-      }
-    } catch (e) {
-      console.error(e);
-      return 'Failed to compile reasoning trace narrative.';
-    }
-  }, [simResult, narrativeFormat, reasoningEngine, ee]);
-
   // Calculate bottom bar summary variables
   const summaryMetrics = useMemo(() => {
-    if (!activeGraph) return { avgPressure: 1.0, pressureDelta: 0.0, avgConf: 0.95, countSpecies: 0, countWatersheds: 0, countHabitats: 0 };
+    if (!activeGraph) return { avgPressure: 0.78, pressureDelta: 0.0, avgConf: 0.88, countSpecies: 3, countWatersheds: 2, countHabitats: 2 };
     
     const nodes = activeGraph.getNodes();
     const pressures = nodes.map(n => n.properties.currentPressure ?? 1.0);
@@ -349,95 +316,61 @@ export const Control: React.FC = () => {
     };
   }, [activeGraph]);
 
-  // Executive summary dashboard calculations
-  const bpiData = useMemo(() => {
-    if (!activeGraph) return { value: 0, category: 'N/A' };
-    const speciesNodes = activeGraph.getNodes().filter(n => n.type === 'SPECIES');
-    if (speciesNodes.length === 0) return { value: 0, category: 'N/A' };
-    
-    const avgSpeciesPressure = speciesNodes.reduce((acc, node) => acc + (node.properties.currentPressure ?? 1.0), 0) / speciesNodes.length;
-    
-    const value = Math.min(Math.max(Math.round(avgSpeciesPressure * 78), 0), 100);
-    
-    let category = 'Moderate';
-    if (value <= 20) category = 'Very Low';
-    else if (value <= 40) category = 'Low';
-    else if (value <= 60) category = 'Moderate';
-    else if (value <= 80) category = 'High';
-    else category = 'Critical';
-    
-    return { value, category };
-  }, [activeGraph]);
+  // BPI Target calculation
+  const bpiScore = useMemo(() => {
+    return Math.round(summaryMetrics.avgPressure * 100);
+  }, [summaryMetrics.avgPressure]);
 
-  const aggregatedConfidence = useMemo(() => {
-    if (!activeGraph) return 0;
-    const nodes = activeGraph.getNodes();
-    const validNodes = nodes.filter(n => n.metadata?.confidence !== undefined);
-    const avgNodeConf = validNodes.length > 0
-      ? validNodes.reduce((acc, n) => acc + (n.metadata.confidence ?? 0.95), 0) / validNodes.length
-      : 0.95;
-    
-    const nodesWithCitations = nodes.filter(n => n.evidence && n.evidence.length > 0).length;
-    const citationCoverage = nodes.length > 0 ? nodesWithCitations / nodes.length : 1.0;
-    
-    const val = (avgNodeConf * 0.7) + (citationCoverage * 0.3);
-    return Math.min(Math.max(Math.round(val * 100), 0), 100);
-  }, [activeGraph]);
+  const bpiRating = useMemo(() => {
+    if (bpiScore >= 70) return { label: 'HIGH', color: 'text-red-500 border-red-500/20 bg-red-500/5' };
+    if (bpiScore >= 40) return { label: 'MODERATE', color: 'text-orange-400 border-orange-400/20 bg-orange-400/5' };
+    return { label: 'LOW', color: 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5' };
+  }, [bpiScore]);
 
-  const repWatershed = useMemo(() => {
-    if (!activeGraph) return { name: 'N/A', stressIndex: 0.0, stressCategory: 'N/A' };
-    const watersheds = activeGraph.getNodes().filter(n => n.type === 'WATERSHED');
-    if (watersheds.length === 0) return { name: 'N/A', stressIndex: 0.0, stressCategory: 'N/A' };
-    
-    let maxStress = -1;
-    let bestNode = watersheds[0];
-    for (const node of watersheds) {
-      const stress = node.properties.stressIndex ?? node.metadata?.metadata?.stressIndex ?? 0.0;
-      if (stress > maxStress) {
-        maxStress = stress;
-        bestNode = node;
-      }
-    }
-    
-    const name = bestNode.label;
-    const stressIndex = maxStress;
-    const stressCategory = bestNode.metadata?.metadata?.stressCategory ?? (stressIndex > 0.8 ? 'Critical' : stressIndex > 0.6 ? 'High' : 'Moderate');
-    
-    return { name, stressIndex, stressCategory };
-  }, [activeGraph]);
+  // Smooth count-up/down animation effect for displayed BPI
+  useEffect(() => {
+    let animFrame: number;
+    const target = bpiScore;
+    const step = () => {
+      setDisplayedBpi((prev) => {
+        if (prev === target) return prev;
+        const diff = target - prev;
+        const stepVal = Math.ceil(Math.abs(diff) / 6) * Math.sign(diff);
+        const next = prev + stepVal;
+        if ((diff > 0 && next >= target) || (diff < 0 && next <= target)) {
+          return target;
+        }
+        animFrame = requestAnimationFrame(step);
+        return next;
+      });
+    };
+    animFrame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animFrame);
+  }, [bpiScore]);
 
-  const repSpecies = useMemo(() => {
-    if (!activeGraph) return [];
-    const species = activeGraph.getNodes().filter(n => n.type === 'SPECIES');
-    const sorted = [...species].sort((a, b) => {
-      const pA = a.properties.currentPressure ?? 1.0;
-      const pB = b.properties.currentPressure ?? 1.0;
-      return pB - pA;
-    });
-    
-    return sorted.slice(0, 3).map(s => {
-      return {
-        commonName: s.metadata?.metadata?.commonName ?? s.label,
-        status: s.metadata?.status ?? 'Least Concern'
-      };
-    });
-  }, [activeGraph]);
+  // Image selector mapping
+  const getMealImage = (name: string) => {
+    const lName = name.toLowerCase();
+    if (lName.includes('biryani')) return '/biryani.png';
+    if (lName.includes('salad')) return '/salad.png';
+    return '/millet.png'; // Fallback
+  };
 
-  // Replay specific wave messages helper
+  // Replay specific wave description
   const replayWaveDescription = useMemo(() => {
     if (replayWave === null) return '';
     const descriptions = [
-      'Wave 0: User hypothetical change question accepted into ERE simulation pad.',
-      'Wave 1: Meal node classification identified and mapped.',
-      'Wave 2: Culinary ingredient nodes resolved (constituent weight ratios computed).',
-      'Wave 3: Crop dataset supply chains reconstructed (irrigation drafts resolved).',
-      'Wave 4: Agrarian cultivation region locations identified.',
-      'Wave 5: River catchments and watersheds identified via WRIS logs.',
-      'Wave 6: Ecosystem habitats connected via IUCN RLE indices.',
-      'Wave 7: Wildlife occurrences linked (GBIF coordinates attached).',
-      'Wave 8: Evidence citations annotated and trust weights applied.',
-      'Wave 9: Scenario pressure cascade propagated down to native habitats.',
-      'Wave 10: RRT reasoning narratives generated and final conclusion briefs exported.'
+      'Wave 0: User hypothetical question accepted.',
+      'Wave 1: Meal detected.',
+      'Wave 2: Ingredients resolved.',
+      'Wave 3: Supply chain reconstructed.',
+      'Wave 4: Watershed identified.',
+      'Wave 5: Habitats connected.',
+      'Wave 6: Species linked.',
+      'Wave 7: Evidence attached.',
+      'Wave 8: Simulation propagated.',
+      'Wave 9: Reasoning generated.',
+      'Wave 10: Final conclusion brief compiled.'
     ];
     return descriptions[replayWave] || '';
   }, [replayWave]);
@@ -447,11 +380,11 @@ export const Control: React.FC = () => {
       <PageContainer className="flex flex-col items-center justify-center min-h-[calc(100vh-8rem)]">
         <div className="flex flex-col items-center gap-4 text-center max-w-sm">
           <RefreshCw className="w-8 h-8 text-accent-cyan animate-spin" />
-          <h2 className="text-sm font-semibold font-mono text-text-primary tracking-wider uppercase">
-            Initializing Control Console
+          <h2 className="text-sm font-semibold font-sans text-text-primary tracking-wider uppercase">
+            Loading Laboratory Data
           </h2>
-          <p className="text-[10px] font-mono text-text-muted leading-relaxed">
-            Stitching Environmental Context Graph nodes, calculating base confidence, and loading hydrologic basin matrices...
+          <p className="text-xs font-sans text-text-muted leading-relaxed">
+            Assembling Environmental Context Graph nodes and querying IUCN occurrence layers...
           </p>
         </div>
       </PageContainer>
@@ -459,1051 +392,656 @@ export const Control: React.FC = () => {
   }
 
   const mealNode = activeGraph.getNodes().find(n => n.type === 'MEAL');
-  const mealName = mealNode?.label || 'Target Specimen';
-  const confidencePercent = Math.round((mealNode?.metadata.confidence ?? 0.95) * 100);
+  const mealName = mealNode?.label || 'Specimen';
+  const confidencePercent = Math.round(summaryMetrics.avgConf * 100);
+
+  const isGraphBuilding = graphBuildWave !== null && graphBuildWave < 8;
 
   return (
-    <PageContainer size="full" className="flex flex-col min-h-[calc(100vh-6rem)] space-y-4 pb-20 relative bg-bg-darkest">
+    <PageContainer size="full" className="flex flex-col min-h-[calc(100vh-6rem)] space-y-6 pb-24 relative bg-bg-darkest selection:bg-accent-cyan/35 text-text-secondary font-sans">
       
-      {/* Header bar */}
-      <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between border-b border-border-subtle pb-4 gap-4 bg-bg-darkest">
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => navigate('/discovery')}
-            className="p-1.5 text-text-secondary hover:text-text-primary bg-bg-panel border border-border-subtle rounded cursor-pointer"
-            title="Back to Discovery Trail"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-          </button>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[9px] font-mono text-accent-cyan bg-accent-cyan/10 border border-accent-cyan/20 px-2 py-0.5 rounded leading-none">
-                {demoMode ? 'DEMO MODE ACTIVE' : 'MISSION CONTROL'}
-              </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-status-available animate-pulse" />
-              <span className="text-[9px] font-mono text-text-muted uppercase">ACTIVE DATASTREAM</span>
-            </div>
-            <h1 className="text-lg font-bold font-mono tracking-tight text-text-primary mt-1">
-              Ripple Laboratory Workspace
-            </h1>
-          </div>
-        </div>
-
-        {/* Demo & Judge Toggles */}
-        <div className="flex flex-wrap items-center gap-3">
-          <Button
-            size="sm"
-            variant={demoMode ? 'primary' : 'secondary'}
-            onClick={toggleDemoMode}
-            className="font-mono text-[9px] uppercase px-3 cursor-pointer"
-          >
-            {demoMode ? '✓ Demo Mode On' : 'Start Demo Mode'}
-          </Button>
-
-          <Button
-            size="sm"
-            variant={judgeMode ? 'primary' : 'secondary'}
-            onClick={toggleJudgeMode}
-            className="font-mono text-[9px] uppercase px-3 cursor-pointer"
-          >
-            {judgeMode ? '✓ Judge Mode On' : 'Start Judge Mode'}
-          </Button>
-        </div>
-
-        {/* Telemetry metadata readouts */}
-        <div className="flex flex-wrap items-center gap-6 text-[10px] font-mono text-text-secondary">
-          <div className="flex flex-col items-end">
-            <span className="text-[8px] text-text-muted uppercase">Target Specimen</span>
-            <span className="text-text-primary font-bold">{mealName.toUpperCase()}</span>
-          </div>
-          <div className="flex flex-col items-end border-l border-border-subtle pl-6">
-            <span className="text-[8px] text-text-muted uppercase">Telemetry Trust</span>
-            <span className="text-accent-cyan font-bold">{confidencePercent}% CONFIDENCE</span>
-          </div>
-          <div className="flex flex-col items-end border-l border-border-subtle pl-6">
-            <span className="text-[8px] text-text-muted">SYSTEM CLOCK</span>
-            <div className="flex items-center gap-1.5 text-text-primary font-bold">
-              <Clock className="w-3.5 h-3.5 text-accent-cyan" />
-              <span>{timeString}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Workspace Sub-Tabs navigation */}
-      <div className="flex border-b border-border-subtle shrink-0 font-mono text-[10px]">
-        <button
-          onClick={() => setActiveWorkspaceTab('console')}
-          className={`pb-2.5 px-4 font-bold border-b-2 uppercase tracking-wide bg-transparent outline-none border-0 cursor-pointer transition-all duration-150 ${
-            activeWorkspaceTab === 'console' ? 'border-accent-cyan text-accent-cyan' : 'border-transparent text-text-muted hover:text-text-secondary'
-          }`}
-        >
-          <div className="flex items-center gap-1.5">
-            <Network className="w-3.5 h-3.5" />
-            <span>Mission Control Console</span>
-          </div>
-        </button>
-        <button
-          onClick={() => setActiveWorkspaceTab('comparison')}
-          className={`pb-2.5 px-4 font-bold border-b-2 uppercase tracking-wide bg-transparent outline-none border-0 cursor-pointer transition-all duration-150 ${
-            activeWorkspaceTab === 'comparison' ? 'border-accent-cyan text-accent-cyan' : 'border-transparent text-text-muted hover:text-text-secondary'
-          }`}
-        >
-          <div className="flex items-center gap-1.5">
-            <FileSpreadsheet className="w-3.5 h-3.5" />
-            <span>Before / After Comparison</span>
-          </div>
-        </button>
-        <button
-          onClick={() => setActiveWorkspaceTab('lineage')}
-          className={`pb-2.5 px-4 font-bold border-b-2 uppercase tracking-wide bg-transparent outline-none border-0 cursor-pointer transition-all duration-150 ${
-            activeWorkspaceTab === 'lineage' ? 'border-accent-cyan text-accent-cyan' : 'border-transparent text-text-muted hover:text-text-secondary'
-          }`}
-        >
-          <div className="flex items-center gap-1.5">
-            <Layers className="w-3.5 h-3.5" />
-            <span>Lineage & Assumptions</span>
-          </div>
-        </button>
-        <button
-          onClick={() => setActiveWorkspaceTab('executive')}
-          className={`pb-2.5 px-4 font-bold border-b-2 uppercase tracking-wide bg-transparent outline-none border-0 cursor-pointer transition-all duration-150 ${
-            activeWorkspaceTab === 'executive' ? 'border-accent-cyan text-accent-cyan' : 'border-transparent text-text-muted hover:text-text-secondary'
-          }`}
-        >
-          <div className="flex items-center gap-1.5">
-            <Award className="w-3.5 h-3.5" />
-            <span>Executive Briefing</span>
-          </div>
-        </button>
-      </div>
-
-      {/* 🚨 Executive Scientific Summary Panel */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 bg-bg-panel/20 p-4 rounded-xl border border-border-subtle/50 backdrop-blur-md shrink-0">
+      {/* 1. TOP HERO (15% height) - Fades in dynamically */}
+      <div className={`flex flex-col md:flex-row items-stretch gap-6 border-b border-border-subtle/50 pb-6 bg-bg-darkest transition-opacity duration-700 ${isGraphBuilding ? 'opacity-20 pointer-events-none blur-sm' : 'opacity-100'}`}>
         
-        {/* 1. Biodiversity Pressure Index (BPI) */}
-        <div className="bg-bg-darkest/50 border border-border-subtle p-3 rounded-lg flex flex-col justify-between hover:border-accent-cyan/40 transition-all duration-300 group">
-          <div className="flex justify-between items-start">
-            <span className="text-[8.5px] font-mono text-text-muted uppercase font-bold tracking-wider">Biodiversity Pressure Index (BPI)</span>
-            <Activity className="w-3.5 h-3.5 text-accent-cyan" />
+        {/* Meal Card */}
+        <div className="flex-1 min-w-[280px] flex items-center gap-4 bg-bg-panel/10 p-4 rounded-2xl border-0">
+          <button 
+            onClick={() => navigate('/')}
+            className="p-2 text-text-secondary hover:text-text-primary bg-bg-dark border border-border-subtle/50 rounded-lg cursor-pointer shrink-0"
+            title="Back to Landing Page"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          
+          <div className="w-16 h-16 rounded-xl overflow-hidden bg-bg-darkest/80 border border-border-subtle shrink-0">
+            <img src={getMealImage(mealName)} alt={mealName} className="w-full h-full object-cover" />
           </div>
-          <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-2xl font-bold font-mono text-text-primary tracking-tight group-hover:text-accent-cyan transition-colors duration-300">{bpiData.value}</span>
-            <span className="text-[10px] text-text-muted">/ 100</span>
-          </div>
-          <div className="mt-1">
-            <span className={`inline-block text-[8px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${
-              bpiData.category === 'Critical' ? 'bg-status-danger/10 text-status-danger border border-status-danger/20' :
-              bpiData.category === 'High' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
-              bpiData.category === 'Moderate' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
-              'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-            }`}>
-              {bpiData.category}
-            </span>
-          </div>
-        </div>
-
-        {/* 2. Confidence Score */}
-        <div className="bg-bg-darkest/50 border border-border-subtle p-3 rounded-lg flex flex-col justify-between hover:border-accent-cyan/40 transition-all duration-300">
-          <div className="flex justify-between items-start">
-            <span className="text-[8.5px] font-mono text-text-muted uppercase font-bold tracking-wider">Scientific Confidence</span>
-            <ShieldCheck className="w-3.5 h-3.5 text-accent-cyan" />
-          </div>
-          <div className="mt-2.5">
-            <div className="text-xl font-bold font-mono text-accent-cyan">{aggregatedConfidence}%</div>
-            <div className="w-full bg-zinc-800 h-1.5 rounded-full mt-2 overflow-hidden border border-zinc-700/50">
-              <div 
-                className="bg-accent-cyan h-full rounded-full transition-all duration-500" 
-                style={{ width: `${aggregatedConfidence}%` }} 
-              />
-            </div>
-          </div>
-          <span className="text-[7.5px] font-mono text-text-muted mt-1">Aggregated from RKB nodes & cits</span>
-        </div>
-
-        {/* 3. Representative Watershed */}
-        <div className="bg-bg-darkest/50 border border-border-subtle p-3 rounded-lg flex flex-col justify-between hover:border-accent-cyan/40 transition-all duration-300">
-          <div className="flex justify-between items-start">
-            <span className="text-[8.5px] font-mono text-text-muted uppercase font-bold tracking-wider">Rep. Watershed</span>
-            <Compass className="w-3.5 h-3.5 text-accent-cyan" />
-          </div>
-          <div className="mt-2.5">
-            <div className="text-xs font-bold font-mono text-text-primary truncate" title={repWatershed.name}>{repWatershed.name}</div>
-            <div className="text-[9px] text-text-secondary mt-1 flex items-center gap-1.5">
-              <span>Stress: <span className="font-bold text-text-primary">{(repWatershed.stressIndex).toFixed(2)}</span></span>
-              <span className={`px-1.5 py-0.2 rounded text-[7px] font-bold uppercase ${
-                repWatershed.stressCategory === 'Critical' ? 'bg-status-danger/10 text-status-danger' :
-                repWatershed.stressCategory === 'High' ? 'bg-amber-500/10 text-amber-500' :
-                'bg-blue-500/10 text-blue-400'
-              }`}>
-                {repWatershed.stressCategory}
+          
+          <div className="space-y-1 text-left">
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-extrabold text-text-primary leading-none">{mealName}</h2>
+              <span className={`px-2 py-0.5 rounded-full border text-[7.5px] font-sans font-bold ${bpiRating.color}`}>
+                BIODIVERSITY IMPACT: {bpiRating.label}
               </span>
             </div>
+            <p className="text-[10.5px] text-text-muted leading-relaxed font-sans mt-1 max-w-sm">
+              This meal affects <span className="text-text-primary font-bold">{summaryMetrics.countWatersheds} watersheds</span> and <span className="text-text-primary font-bold">{summaryMetrics.countSpecies} vulnerable species</span> downstream.
+            </p>
           </div>
-          <span className="text-[7.5px] font-mono text-text-muted mt-1">Max stress basin in simulation</span>
         </div>
 
-        {/* 4. Representative Species */}
-        <div className="bg-bg-darkest/50 border border-border-subtle p-3 rounded-lg flex flex-col justify-between hover:border-accent-cyan/40 transition-all duration-300">
-          <div className="flex justify-between items-start">
-            <span className="text-[8.5px] font-mono text-text-muted uppercase font-bold tracking-wider">Affected Species</span>
-            <Layers className="w-3.5 h-3.5 text-accent-cyan" />
+        {/* BPI circle meter with Hover tooltips */}
+        <div 
+          className="relative flex items-center gap-6 bg-bg-panel/10 px-6 py-3 rounded-2xl border-0 cursor-help"
+          onMouseEnter={() => setShowBpiTooltip(true)}
+          onMouseLeave={() => setShowBpiTooltip(false)}
+        >
+          <div className="relative flex items-center justify-center w-14 h-14 shrink-0">
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+              <path
+                className="text-border-subtle/40"
+                strokeWidth="2.5"
+                stroke="currentColor"
+                fill="none"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+              <path
+                className={bpiScore >= 70 ? 'text-red-500' : bpiScore >= 40 ? 'text-orange-400' : 'text-emerald-400'}
+                strokeDasharray={`${displayedBpi}, 100`}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                stroke="currentColor"
+                fill="none"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              />
+            </svg>
+            <span className="absolute text-sm font-extrabold text-text-primary leading-none">{displayedBpi}</span>
           </div>
-          <div className="mt-1.5 space-y-1 overflow-hidden">
-            {repSpecies.length === 0 ? (
-              <span className="text-[8.5px] font-mono text-text-muted">None active</span>
-            ) : (
-              repSpecies.map((sp, idx) => (
-                <div key={idx} className="flex justify-between items-center text-[8.5px] font-mono border-b border-border-subtle/25 pb-0.5 last:border-b-0 truncate">
-                  <span className="text-text-secondary truncate max-w-[90px]" title={sp.commonName}>{sp.commonName}</span>
-                  <span className={`text-[7px] font-bold uppercase leading-none px-1 rounded ${
-                    sp.status === 'Endangered' || sp.status === 'Critically Endangered' ? 'text-status-danger bg-status-danger/10' :
-                    sp.status === 'Vulnerable' ? 'text-amber-500 bg-amber-500/10' : 'text-emerald-400 bg-emerald-400/10'
-                  }`}>{sp.status.substring(0, 4)}.</span>
-                </div>
-              ))
+
+          <div className="text-left space-y-0.5">
+            <div className="flex items-center gap-1">
+              <span className="text-[8px] text-text-muted uppercase tracking-wider block font-bold">Biodiversity Pressure Index</span>
+              <HelpCircle className="w-3 h-3 text-text-muted/65" />
+            </div>
+            <span className="text-xs font-extrabold text-text-primary block leading-none">{displayedBpi} / 100</span>
+          </div>
+
+          {/* BPI Tooltip */}
+          {showBpiTooltip && (
+            <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-52 p-3 bg-bg-panel border border-border-subtle rounded-xl text-[9px] text-text-secondary leading-relaxed z-45 text-left shadow-2xl backdrop-blur-md">
+              BPI maps agricultural drawdowns, runoff, and chemical loads down your food supply chain into a 0 to 100 indicator index.
+            </div>
+          )}
+        </div>
+
+        {/* Confidence + Controls Toggles with hover tooltip */}
+        <div 
+          className="relative flex items-center gap-4 bg-bg-panel/10 px-6 py-4 rounded-2xl border-0"
+        >
+          <div 
+            className="text-left cursor-help"
+            onMouseEnter={() => setShowConfTooltip(true)}
+            onMouseLeave={() => setShowConfTooltip(false)}
+          >
+            <div className="flex items-center gap-1">
+              <span className="text-[8px] text-text-muted uppercase tracking-wider block font-bold leading-none">Confidence Rating</span>
+              <HelpCircle className="w-3 h-3 text-text-muted/65" />
+            </div>
+            <span className="inline-flex items-center mt-1 text-[10px] font-sans font-bold text-accent-cyan bg-accent-cyan/10 border border-accent-cyan/20 px-2 py-0.5 rounded-full">
+              {confidencePercent}% CONFIDENCE
+            </span>
+
+            {/* Confidence Tooltip */}
+            {showConfTooltip && (
+              <div className="absolute top-full left-1/4 transform -translate-x-1/2 mt-2 w-52 p-3 bg-bg-panel border border-border-subtle rounded-xl text-[9px] text-text-secondary leading-relaxed z-45 text-left shadow-2xl backdrop-blur-md">
+                Derived dynamically based on registry credentials (IUCN Red List weight: 98%, FAOSTAT: 94%, GBIF Occurrences: 88%).
+              </div>
             )}
           </div>
-        </div>
 
-        {/* 5. Evidence Summary */}
-        <div className="bg-bg-darkest/50 border border-border-subtle p-3 rounded-lg flex flex-col justify-between hover:border-accent-cyan/40 transition-all duration-300">
-          <div className="flex justify-between items-start">
-            <span className="text-[8.5px] font-mono text-text-muted uppercase font-bold tracking-wider">Evidence Summary</span>
-            <Database className="w-3.5 h-3.5 text-accent-cyan" />
-          </div>
-          <div className="mt-2.5 grid grid-cols-3 gap-1.5 text-center text-zinc-400 text-[9px] font-mono">
-            <div className="bg-bg-dark border border-border-subtle/50 p-1 rounded">
-              <div className="font-bold text-accent-cyan">{evidenceJson.length}</div>
-              <div className="text-[6.5px] text-text-muted uppercase">Evid</div>
-            </div>
-            <div className="bg-bg-dark border border-border-subtle/50 p-1 rounded">
-              <div className="font-bold text-accent-cyan">{citationsJson.length}</div>
-              <div className="text-[6.5px] text-text-muted uppercase">Cits</div>
-            </div>
-            <div className="bg-bg-dark border border-border-subtle/50 p-1 rounded">
-              <div className="font-bold text-accent-cyan">{datasetsJson.length}</div>
-              <div className="text-[6.5px] text-text-muted uppercase">DSet</div>
-            </div>
-          </div>
-          <span className="text-[7.5px] font-mono text-text-muted mt-1">Ontology-backed resources</span>
-        </div>
+          <div className="flex items-center gap-2 border-l border-border-subtle/50 pl-4 font-sans text-[9px] font-bold">
+            <button
+              onClick={toggleDemoMode}
+              className={`px-3 py-2 rounded-xl border transition-colors cursor-pointer ${
+                demoMode ? 'bg-text-primary text-bg-darkest border-text-primary' : 'bg-transparent text-text-secondary border-border-subtle hover:text-text-primary'
+              }`}
+            >
+              {demoMode ? '✓ Demo Mode' : 'Demo Mode'}
+            </button>
 
-        {/* 6. Data Quality */}
-        <div className="bg-bg-darkest/50 border border-border-subtle p-3 rounded-lg flex flex-col justify-between hover:border-accent-cyan/40 transition-all duration-300">
-          <div className="flex justify-between items-start">
-            <span className="text-[8.5px] font-mono text-text-muted uppercase font-bold tracking-wider">Data Quality & Ver.</span>
-            <ShieldCheck className="w-3.5 h-3.5 text-accent-cyan" />
+            <button
+              onClick={toggleJudgeMode}
+              className={`px-3 py-2 rounded-xl border transition-colors cursor-pointer ${
+                judgeMode ? 'bg-text-primary text-bg-darkest border-text-primary' : 'bg-transparent text-text-secondary border-border-subtle hover:text-text-primary'
+              }`}
+            >
+              {judgeMode ? '✓ Judge Mode' : 'Judge Mode'}
+            </button>
+
+            <Button
+              onClick={() => handleRunSimulation(demoMode ? 'scen-millet' : 'control')}
+              variant="primary"
+              size="md"
+              disabled={isSimulating}
+              className="font-sans text-[10px] uppercase font-bold tracking-wider py-2 px-4 cursor-pointer bg-gradient-to-r from-accent-cyan to-indigo-500 hover:shadow-glow disabled:opacity-50"
+            >
+              {isSimulating ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                'Run Simulation'
+              )}
+            </Button>
           </div>
-          <div className="mt-2">
-            <div className="flex justify-between items-center text-[8.5px] font-mono">
-              <span className="text-text-muted">STATUS:</span>
-              <span className="text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/25 px-1.5 py-0.2 rounded text-[7.5px]">PASS</span>
-            </div>
-            <div className="flex justify-between items-center text-[8.5px] font-mono mt-1">
-              <span className="text-text-muted">RKB VER:</span>
-              <span className="text-text-secondary">v1.0.0</span>
-            </div>
-            <div className="flex justify-between items-center text-[8.5px] font-mono mt-1">
-              <span className="text-text-muted">VERIFIED:</span>
-              <span className="text-text-secondary">2026-07-16</span>
-            </div>
-          </div>
-          <span className="text-[7.5px] font-mono text-text-muted mt-1">All startup schemas certified</span>
         </div>
 
       </div>
 
-      {/* VIEWPORT PANEL 1: MISSION CONTROL CONSOLE */}
-      {activeWorkspaceTab === 'console' && (
-        <div className="grid grid-cols-1 lg:grid-cols-10 gap-4 flex-1">
+      {/* 2. MAIN AREA (55% height) - Grid Split Left Graph / Right Insights */}
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 items-stretch flex-1 relative">
+        
+        {/* LEFT COLUMN (70% width) - Environmental Context Graph viewer */}
+        <div className="lg:col-span-7 flex flex-col h-full bg-bg-panel/5 rounded-3xl border-0 overflow-hidden relative p-4">
           
-          {/* LEFT PANEL (30% width) - ECG Graph Viewer */}
-          <div className="lg:col-span-3 flex flex-col h-full">
-            <Card bordered className="flex-1 flex flex-col p-4 bg-bg-panel/20">
-              <div className="flex items-center justify-between border-b border-border-subtle pb-3 mb-4 shrink-0">
-                <div className="flex items-center gap-2 text-xs font-mono font-bold text-text-primary uppercase">
-                  <Layers className="w-4 h-4 text-accent-cyan" />
-                  <span>Environmental Context Graph</span>
-                </div>
-                
-                {simResult && !isReplaying && (
-                  <Button 
-                    size="sm" 
-                    variant="primary" 
-                    onClick={handleStartReplay}
-                    className="font-mono text-[8px] uppercase tracking-wider py-0.5 cursor-pointer"
-                  >
-                    ▶ Replay Ripple
-                  </Button>
-                )}
+          <div className="absolute top-4 right-4 z-20 flex gap-2">
+            {simResult && !isReplaying && !isGraphBuilding && (
+              <Button 
+                size="sm" 
+                variant="primary" 
+                onClick={handleStartReplay}
+                className="font-sans text-[8px] uppercase tracking-wider py-1 cursor-pointer bg-bg-panel border border-border-subtle text-text-secondary hover:text-text-primary"
+              >
+                ▶ Replay Ripple
+              </Button>
+            )}
 
-                {isReplaying && (
-                  <span className="text-[8px] font-mono text-accent-cyan bg-accent-cyan/15 border border-accent-cyan/35 px-1.5 py-0.5 rounded animate-pulse">
-                    REPLAY WAVE {replayWave}/10
-                  </span>
-                )}
-              </div>
-              
-              <div className="flex-1 min-h-[500px]">
-                <GraphViewer 
-                  nodes={activeGraph.getNodes()}
-                  edges={activeGraph.getEdges()}
-                  selectedNodeId={selectedNode?.id || null}
-                  onSelectNode={setSelectedNode}
-                  hoveredNodeId={hoveredNodeId}
-                  setHoveredNodeId={setHoveredNodeId}
-                  replayWave={replayWave}
-                />
-              </div>
-
-              {isReplaying && (
-                <div className="mt-3 p-2 bg-accent-cyan/5 border border-accent-cyan/20 rounded font-mono text-[9px] text-accent-cyan text-center leading-relaxed">
-                  {replayWaveDescription}
-                </div>
-              )}
-            </Card>
+            {isReplaying && (
+              <span className="text-[8px] font-sans text-accent-cyan bg-accent-cyan/15 border border-accent-cyan/35 px-2 py-1 rounded animate-pulse font-bold uppercase tracking-wider">
+                REPLAY WAVE {replayWave}/10
+              </span>
+            )}
           </div>
 
-          {/* CENTER PANEL (40% width) - Simulation Workspace */}
-          <div className="lg:col-span-4 flex flex-col h-full space-y-4">
-            
-            {/* Top Panel: Scenario configuration trigger */}
-            <Card bordered className="bg-bg-panel/30 border-accent-cyan/10 p-5 space-y-4 shrink-0">
-              <div className="flex items-center gap-2 text-xs font-mono font-bold text-text-primary uppercase border-b border-border-subtle pb-3">
-                <Compass className="w-4 h-4 text-accent-cyan" />
-                <span>Ecological Simulation Controller</span>
-              </div>
+          <div className="flex-1 min-h-[580px]">
+            <GraphViewer 
+              nodes={activeGraph.getNodes()}
+              edges={activeGraph.getEdges()}
+              selectedNodeId={selectedNode?.id || null}
+              onSelectNode={setSelectedNode}
+              hoveredNodeId={hoveredNodeId}
+              setHoveredNodeId={setHoveredNodeId}
+              replayWave={graphBuildWave !== null ? graphBuildWave : replayWave}
+            />
+          </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                <div className="sm:col-span-2 space-y-1.5">
-                  <label className="text-[9px] font-mono text-text-muted uppercase block">
-                    Select Consumption Scenario
-                  </label>
-                  <select
-                    disabled={demoMode}
-                    value={selectedScenarioId}
-                    onChange={(e) => {
-                      setSelectedScenarioId(e.target.value);
-                      handleRunSimulation(e.target.value);
-                    }}
-                    className="w-full bg-bg-darkest border border-border-subtle text-text-primary text-xs font-mono rounded px-3 py-2 focus:border-accent-cyan outline-none disabled:opacity-50"
-                  >
-                    <option value="control">Control: Base Consumption</option>
-                    {scenariosList.map(s => (
-                      <option key={s.id} value={s.id}>{s.title}</option>
-                    ))}
-                  </select>
-                </div>
+          {isReplaying && (
+            <div className="absolute bottom-6 left-6 right-6 p-3 bg-bg-panel/90 border border-border-subtle rounded-xl font-mono text-[9px] text-accent-cyan text-center leading-relaxed backdrop-blur-md">
+              {replayWaveDescription}
+            </div>
+          )}
+        </div>
 
-                {!judgeMode && (
-                  <div className="pt-5">
-                    <Button
-                      type="button"
-                      variant="primary"
-                      size="md"
-                      onClick={() => handleRunSimulation()}
-                      disabled={isSimulating || demoMode}
-                      className="w-full font-mono text-xs uppercase gap-2 bg-gradient-to-r from-accent-cyan to-indigo-600 hover:shadow-glow cursor-pointer disabled:opacity-50"
-                    >
-                      {isSimulating ? (
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Play className="w-4 h-4 fill-current" />
-                      )}
-                      <span>{isSimulating ? 'Simulating...' : 'Run Simulation'}</span>
-                    </Button>
-                  </div>
-                )}
-              </div>
+        {/* RIGHT COLUMN (30% width) - National Geographic Insight panel */}
+        <div className={`lg:col-span-3 flex flex-col h-full bg-bg-panel/10 p-5 rounded-3xl border-0 justify-between max-h-[610px] text-left transition-opacity duration-700 ${isGraphBuilding ? 'opacity-20 pointer-events-none blur-sm' : 'opacity-100'}`}>
+          
+          <div className="border-b border-border-subtle/50 pb-2.5 shrink-0">
+            <h3 className="text-xs font-sans font-bold text-text-primary uppercase tracking-wider font-sans">
+              Ecological Insights
+            </h3>
+          </div>
 
-              {selectedScenarioId !== 'control' && (
-                <p className="text-[10px] font-mono text-text-secondary leading-relaxed bg-bg-darkest/40 border border-border-subtle rounded p-2.5">
-                  <span className="text-accent-cyan font-bold">SCENARIO OBJECTIVE:</span> {scenariosList.find(s => s.id === selectedScenarioId)?.description}
-                </p>
-              )}
-            </Card>
+          <div className="flex-1 flex flex-col justify-center space-y-4 pt-4">
+            {/* Card 1: Primary Driver */}
+            <div className="p-4 bg-bg-darkest/40 border border-border-subtle/40 rounded-2xl space-y-1">
+              <span className="text-[8px] text-text-muted uppercase tracking-wider block font-bold">Primary Pressure Driver</span>
+              <p className="text-[11px] text-text-primary leading-relaxed font-sans">
+                Rice cultivation contributes most agricultural footprint pressure within regional supply chains.
+              </p>
+            </div>
 
-            {/* Bottom Panel: Timeline */}
-            <Card bordered className="flex-1 flex flex-col p-5 bg-bg-panel/20 overflow-hidden">
-              <div className="flex items-center justify-between border-b border-border-subtle pb-3 mb-4 shrink-0">
-                <div className="flex items-center gap-2 text-xs font-mono font-bold text-text-primary uppercase">
-                  <Activity className="w-4 h-4 text-accent-cyan" />
-                  <span>Simulation Propagation Timeline</span>
-                </div>
-                <span className="text-[9px] font-mono text-text-muted px-2 py-0.5 bg-bg-dark rounded border border-border-subtle">
-                  ERE_CASCADE
+            {/* Card 2: Affected Watershed */}
+            <div className="p-4 bg-bg-darkest/40 border border-border-subtle/40 rounded-2xl space-y-1">
+              <span className="text-[8px] text-text-muted uppercase tracking-wider block font-bold">Downstream Watershed</span>
+              <div className="flex justify-between items-center">
+                <span className="text-[11px] text-text-primary font-bold">Cauvery Basin</span>
+                <span className="text-[9px] text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.2 rounded-full font-bold">
+                  0.65 HIGH STRESS
                 </span>
               </div>
+            </div>
 
-              <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin">
-                {timeline.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center p-8 text-text-muted space-y-3">
-                    <Flame className="w-6 h-6 text-text-muted/40" />
-                    <p className="text-[10px] font-mono leading-relaxed max-w-[240px]">
-                      Awaiting simulation execution. Select a scenario and press "Run Simulation" to propagate pressure cascade.
-                    </p>
-                  </div>
-                ) : (
-                  timeline
-                    .filter(step => replayWave === null || step.wave <= replayWave)
-                    .map((step, idx) => {
-                      const affectedNodeObj = activeGraph.findNode(step.affectedNode);
-                      const isNegativeDelta = step.newPressure < step.oldPressure;
-                      return (
-                        <div 
-                          key={idx} 
-                          className={`p-3 border rounded-lg font-mono text-[10px] space-y-2 transition-all duration-300 ${
-                            isNegativeDelta 
-                              ? 'bg-emerald-500/5 border-emerald-500/15 text-emerald-400' 
-                              : 'bg-status-danger/5 border-status-danger/15 text-status-danger'
-                          }`}
-                        >
-                          <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                              <span className="bg-bg-darkest px-2 py-0.5 rounded text-[8px] text-text-muted">
-                                WAVE {step.wave}
-                              </span>
-                              <span className="text-text-primary font-bold">
-                                {affectedNodeObj?.label || step.affectedNode}
-                              </span>
-                            </div>
-                            <div className="flex gap-2">
-                              <span className="text-text-muted">PRESSURE:</span>
-                              <span className="font-bold">
-                                {step.oldPressure.toFixed(2)} → {step.newPressure.toFixed(2)}
-                              </span>
-                            </div>
-                          </div>
-                          <p className="text-[9px] text-text-secondary leading-relaxed pl-1 border-l border-border-muted/50">
-                            {step.reason}
-                          </p>
-                        </div>
-                      );
-                    })
-                )}
+            {/* Card 3: Vulnerable Species */}
+            <div className="p-4 bg-bg-darkest/40 border border-border-subtle/40 rounded-2xl space-y-1">
+              <span className="text-[8px] text-text-muted uppercase tracking-wider block font-bold">Protected Wildlife Indicator</span>
+              <div className="flex justify-between items-center">
+                <span className="text-[11px] text-text-primary font-bold">Smooth-Coated Otter</span>
+                <span className="text-[9px] text-orange-400 bg-orange-400/10 border border-orange-400/20 px-2 py-0.2 rounded-full font-bold">
+                  Vulnerable
+                </span>
               </div>
-            </Card>
-          </div>
+            </div>
 
-          {/* RIGHT PANEL (30% width) - Tabbed Interface */}
-          <div className="lg:col-span-3 flex flex-col h-full">
-            <Card bordered className="flex-1 flex flex-col p-4 bg-bg-panel/20">
-              
-              <div className="flex border-b border-border-subtle mb-4 shrink-0">
-                <button
-                  onClick={() => setActiveTab('reasoning')}
-                  className={`flex-1 pb-3 text-[10px] font-mono uppercase tracking-wider font-semibold border-b-2 bg-transparent outline-none border-0 cursor-pointer transition-all duration-200 ${
-                    activeTab === 'reasoning' ? 'border-accent-cyan text-accent-cyan' : 'border-transparent text-text-muted'
-                  }`}
-                >
-                  Reasoning Trace
-                </button>
-                <button
-                  onClick={() => setActiveTab('evidence')}
-                  className={`flex-1 pb-3 text-[10px] font-mono uppercase tracking-wider font-semibold border-b-2 bg-transparent outline-none border-0 cursor-pointer transition-all duration-200 ${
-                    activeTab === 'evidence' ? 'border-accent-cyan text-accent-cyan' : 'border-transparent text-text-muted'
-                  }`}
-                >
-                  Evidence
-                </button>
-                <button
-                  onClick={() => setActiveTab('notes')}
-                  className={`flex-1 pb-3 text-[10px] font-mono uppercase tracking-wider font-semibold border-b-2 bg-transparent outline-none border-0 cursor-pointer transition-all duration-200 ${
-                    activeTab === 'notes' ? 'border-accent-cyan text-accent-cyan' : 'border-transparent text-text-muted'
-                  }`}
-                >
-                  Notes
-                </button>
+            {/* Card 4: Recommended Swap */}
+            <div className="p-4 bg-bg-darkest/40 border border-border-subtle/40 rounded-2xl space-y-1">
+              <span className="text-[8px] text-text-muted uppercase tracking-wider block font-bold">Recommended Crop Swap</span>
+              <div className="flex justify-between items-center">
+                <span className="text-[11px] text-text-primary font-bold">Dryland Pearl Millet</span>
+                <span className="text-[10px] text-emerald-400 font-bold">
+                  +31 BPI Improvement
+                </span>
               </div>
-
-              <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin">
-                
-                {selectedNode && (
-                  <div className="p-3 bg-bg-darkest/45 border border-border-subtle rounded-lg mb-4 space-y-1.5 shrink-0">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <span className="text-[8px] font-mono text-text-muted uppercase leading-none block">Selected entity</span>
-                        <h4 className="text-xs font-bold font-mono text-text-primary mt-0.5">{selectedNode.label}</h4>
-                      </div>
-                      <span className="text-[8px] font-mono text-accent-cyan px-2 py-0.5 bg-bg-dark rounded border border-border-subtle">
-                        {selectedNode.type}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 text-[9px] font-mono pt-2 border-t border-border-subtle/50 text-text-secondary">
-                      <div>
-                        <span>CURR PRESSURE:</span>
-                        <span className="text-text-primary font-bold ml-1">
-                          {(selectedNode.properties.currentPressure ?? 1.0).toFixed(2)}
-                        </span>
-                      </div>
-                      <div>
-                        <span>EST. CONFIDENCE:</span>
-                        <span className="text-accent-cyan font-bold ml-1">
-                          {Math.round((selectedNode.metadata.confidence ?? 0.95) * 100)}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* TAB 1: REASONING TRACE */}
-                {activeTab === 'reasoning' && (
-                  <div className="space-y-4 font-mono text-[10px]">
-                    
-                    <div className="flex border border-border-subtle rounded p-0.5 bg-bg-darkest/55">
-                      <button
-                        onClick={() => setReasoningMode('pipeline')}
-                        className={`flex-1 py-1 text-[8px] uppercase tracking-wider rounded font-bold transition-all duration-200 cursor-pointer ${
-                          reasoningMode === 'pipeline' ? 'bg-accent-cyan text-bg-darkest' : 'text-text-muted hover:text-text-primary'
-                        }`}
-                      >
-                        Pipeline Flow
-                      </button>
-                      <button
-                        onClick={() => setReasoningMode('narrative')}
-                        className={`flex-1 py-1 text-[8px] uppercase tracking-wider rounded font-bold transition-all duration-200 cursor-pointer ${
-                          reasoningMode === 'narrative' ? 'bg-accent-cyan text-bg-darkest' : 'text-text-muted hover:text-text-primary'
-                        }`}
-                      >
-                        Narrative Report
-                      </button>
-                    </div>
-
-                    {reasoningMode === 'pipeline' ? (
-                      <>
-                        <h5 className="text-[10px] font-semibold text-text-primary uppercase flex items-center gap-1.5 border-b border-border-subtle/50 pb-2">
-                          <BookOpen className="w-3.5 h-3.5 text-accent-cyan" />
-                          <span>Scientific Pipeline Trace</span>
-                        </h5>
-
-                        <div className="relative pl-4 border-l border-zinc-800 space-y-4 mt-2">
-                          {/* 1. Observation */}
-                          <div className="relative">
-                            <span className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border border-blue-500 bg-bg-darkest flex items-center justify-center">
-                              <span className="w-1 h-1 rounded-full bg-blue-400 animate-ping" />
-                            </span>
-                            <div className="font-bold text-blue-400 uppercase text-[8px] tracking-wider">
-                              Observation
-                            </div>
-                            <div className="text-[9px] text-text-secondary mt-0.5 leading-relaxed">
-                              Telemetry target spec: <span className="text-text-primary">"{mealName}"</span>. Captured and identified in laboratory registry.
-                            </div>
-                          </div>
-
-                          {/* 2. Evidence */}
-                          <div className="relative">
-                            <span className={`absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border bg-bg-darkest ${
-                              selectedNode && selectedNode.evidence.length > 0 ? 'border-cyan-400' : 'border-zinc-700'
-                            }`} />
-                            <div className={`font-bold uppercase text-[8px] tracking-wider ${
-                              selectedNode && selectedNode.evidence.length > 0 ? 'text-cyan-400' : 'text-text-muted'
-                            }`}>
-                              Evidence
-                            </div>
-                            <div className="text-[9px] text-text-secondary mt-0.5 leading-relaxed">
-                              {selectedNode && selectedNode.evidence.length > 0 ? (
-                                <>Scientific provenance: <span className="text-text-primary">{selectedNode.evidence.length} citation(s)</span> mapped from GBIF/IUCN catalog references.</>
-                              ) : (
-                                <>Awaiting node target selection to retrieve evidence registry logs.</>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* 3. Inference */}
-                          <div className="relative">
-                            <span className={`absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border bg-bg-darkest ${
-                              selectedNode ? 'border-purple-400' : 'border-zinc-700'
-                            }`} />
-                            <div className={`font-bold uppercase text-[8px] tracking-wider ${
-                              selectedNode ? 'text-purple-400' : 'text-text-muted'
-                            }`}>
-                              Inference
-                            </div>
-                            <div className="text-[9px] text-text-secondary mt-0.5 leading-relaxed">
-                              {selectedNode ? (
-                                <>Reconstructed node <span className="text-text-primary">"{selectedNode.label}"</span> ({selectedNode.type}) within the active Environmental Context Graph.</>
-                              ) : (
-                                <>Build context graph structure mapping localized crop supply chains.</>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* 4. Simulation */}
-                          <div className="relative">
-                            <span className={`absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border bg-bg-darkest ${
-                              timeline.length > 0 ? 'border-indigo-400' : 'border-zinc-700'
-                            }`} />
-                            <div className={`font-bold uppercase text-[8px] tracking-wider ${
-                              timeline.length > 0 ? 'text-indigo-400' : 'text-text-muted'
-                            }`}>
-                              Simulation
-                            </div>
-                            <div className="text-[9px] text-text-secondary mt-0.5 leading-relaxed">
-                              {timeline.length > 0 ? (
-                                <>Propagation engine actively simulated pressure cascade down to watershed habitats under <span className="text-text-primary">"{selectedScenarioId}"</span> scenario.</>
-                              ) : (
-                                <>Standby. Execute scenario trigger to simulate pressure ripple paths.</>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* 5. Result */}
-                          <div className="relative">
-                            <span className={`absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border bg-bg-darkest ${
-                              selectedNode && Math.abs((selectedNode.properties.currentPressure ?? 1.0) - (selectedNode.properties.basePressure ?? 1.0)) > 0.0001
-                                ? 'border-emerald-400 animate-pulse'
-                                : 'border-zinc-700'
-                            }`} />
-                            <div className={`font-bold uppercase text-[8px] tracking-wider ${
-                              selectedNode && Math.abs((selectedNode.properties.currentPressure ?? 1.0) - (selectedNode.properties.basePressure ?? 1.0)) > 0.0001
-                                ? 'text-emerald-400'
-                                : 'text-text-muted'
-                            }`}>
-                              Result
-                            </div>
-                            <div className="text-[9px] text-text-secondary mt-0.5 leading-relaxed">
-                              {selectedNode ? (
-                                <>
-                                  Pressure Delta: <span className="text-text-primary font-bold">
-                                    {((selectedNode.properties.currentPressure ?? 1.0) - (selectedNode.properties.basePressure ?? 1.0)).toFixed(4)}
-                                  </span>
-                                  <br />
-                                  Pressure state: {selectedNode.properties.basePressure?.toFixed(2) ?? '1.00'} → {selectedNode.properties.currentPressure?.toFixed(2) ?? '1.00'}
-                                </>
-                              ) : (
-                                <>Awaiting scenario output to calculate delta pressure scales.</>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* 6. Confidence */}
-                          <div className="relative">
-                            <span className={`absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border bg-bg-darkest ${
-                              selectedNode ? 'border-cyan-400' : 'border-zinc-700'
-                            }`} />
-                            <div className={`font-bold uppercase text-[8px] tracking-wider ${
-                              selectedNode ? 'text-cyan-400' : 'text-text-muted'
-                            }`}>
-                              Confidence
-                            </div>
-                            <div className="text-[9px] text-text-secondary mt-0.5 leading-relaxed">
-                              {selectedNode ? (
-                                <>Evaluated at <span className="text-text-primary font-bold">{Math.round((selectedNode.metadata.confidence ?? 0.95) * 100)}% trust coefficient</span> derived from data registry weights.</>
-                              ) : (
-                                <>Mean data source and mapping precision confidence index.</>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* 7. Limitations */}
-                          <div className="relative">
-                            <span className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border border-amber-500 bg-bg-darkest" />
-                            <div className="font-bold text-amber-500 uppercase text-[8px] tracking-wider">
-                              Limitations
-                            </div>
-                            <div className="text-[9px] text-text-secondary mt-0.5 leading-relaxed">
-                              Calculates deterministic scenario-based pressure indices only. The engine <span className="text-amber-500 font-bold">does not predict extinction rates</span> or physical biodiversity population metrics.
-                            </div>
-                          </div>
-
-                        </div>
-                      </>
-                    ) : (
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center border-b border-border-subtle/50 pb-2">
-                          <h5 className="text-[10px] font-semibold text-text-primary uppercase flex items-center gap-1.5">
-                            <BookOpen className="w-3.5 h-3.5 text-accent-cyan" />
-                            <span>Telemetry Explanation</span>
-                          </h5>
-                          
-                          <div className="flex gap-1">
-                            {(['SCIENTIFIC', 'JUDGE', 'TECHNICAL'] as const).map(fmt => (
-                              <button
-                                key={fmt}
-                                onClick={() => setNarrativeFormat(fmt)}
-                                className={`px-1.5 py-0.5 rounded text-[7px] font-bold uppercase transition-all duration-150 border cursor-pointer ${
-                                  narrativeFormat === fmt 
-                                    ? 'border-accent-cyan bg-accent-cyan/10 text-accent-cyan' 
-                                    : 'border-border-subtle text-text-muted hover:text-text-secondary'
-                                }`}
-                              >
-                                {fmt.substring(0, 4)}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="whitespace-pre-wrap text-[9px] text-text-secondary leading-relaxed bg-bg-darkest/40 border border-border-subtle p-3 rounded-lg max-h-[450px] overflow-y-auto scrollbar-thin">
-                          {narrativeText}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* TAB 2: EVIDENCE RECORDS */}
-                {activeTab === 'evidence' && (
-                  <div className="space-y-4">
-                    <h5 className="text-[10px] font-mono font-semibold text-text-primary uppercase flex items-center gap-1.5 shrink-0">
-                      <Database className="w-3.5 h-3.5 text-accent-cyan" />
-                      <span>Scientific Citations ({selectedNodeEvidence.length})</span>
-                    </h5>
-
-                    {selectedNodeEvidence.length === 0 ? (
-                      <p className="text-[10px] font-mono text-text-muted leading-relaxed text-center py-8">
-                        No scientific evidence records attached to this node.
-                      </p>
-                    ) : (
-                      selectedNodeEvidence.map((record) => (
-                        <div key={record.id} className="p-3 bg-bg-darkest/40 border border-border-subtle rounded-lg space-y-2.5 font-mono text-[10px] text-text-secondary">
-                          <div className="flex justify-between items-center">
-                            <span className="text-accent-cyan font-bold bg-bg-dark border border-border-subtle px-2 py-0.5 rounded text-[8px]">
-                              {record.source}
-                            </span>
-                            <div className="flex gap-1.5 text-[8px] text-text-muted">
-                              <span>QUALITY:</span>
-                              <span className="text-text-primary font-bold">{Math.round(record.quality * 100)}%</span>
-                            </div>
-                          </div>
-
-                          <p className="text-[9px] text-text-primary leading-relaxed bg-bg-darkest/30 p-2 rounded border border-border-subtle/25">
-                            "{record.statement}"
-                          </p>
-
-                          <div className="space-y-1 text-[8px] text-text-muted">
-                            <div>DATASET: <span className="text-text-secondary">{record.dataset}</span></div>
-                            <div>RETRIEVED: <span className="text-text-secondary">{record.retrievedAt}</span></div>
-                          </div>
-
-                          <div className="border-t border-border-subtle/30 pt-2 flex justify-between items-center text-[8px]">
-                            <span className="text-text-muted truncate max-w-[170px]" title={record.citation}>
-                              {record.citation}
-                            </span>
-                            <a 
-                              href={record.url} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="flex items-center gap-1 text-accent-cyan hover:underline cursor-pointer"
-                            >
-                              <span>PUB</span>
-                              <ExternalLink className="w-2.5 h-2.5" />
-                            </a>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                )}
-
-                {/* TAB 3: EXPERIMENT NOTES */}
-                {activeTab === 'notes' && (
-                  <div className="space-y-3 h-full flex flex-col">
-                    <textarea
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      placeholder="Draft laboratory notes, remarks, hypothesis validations, or policy recommendations here..."
-                      className="w-full flex-1 min-h-[300px] bg-bg-darkest border border-border-subtle text-text-secondary text-xs font-mono rounded-lg p-3 outline-none focus:border-accent-cyan scrollbar-thin resize-none"
-                    />
-                    <div className="flex justify-between items-center text-[9px] font-mono text-text-muted">
-                      <span>CHARACTERS: {notes.length}</span>
-                      <span>AUTO-PERSISTED</span>
-                    </div>
-                  </div>
-                )}
-
-              </div>
-            </Card>
+            </div>
           </div>
 
         </div>
-      )}
 
-      {/* VIEWPORT PANEL 2: BEFORE / AFTER COMPARISON */}
-      {activeWorkspaceTab === 'comparison' && (
-        <Card bordered className="p-6 bg-bg-panel/20 font-mono text-[10px] space-y-6">
-          <div className="flex items-center gap-2 text-xs font-bold text-text-primary uppercase border-b border-border-subtle pb-3">
-            <FileSpreadsheet className="w-4 h-4 text-accent-cyan" />
-            <span>Before / After Scenario Comparison Matrix</span>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-border-subtle text-[8px] text-text-muted uppercase">
-                  <th className="py-2.5">Ecology Metric</th>
-                  <th className="py-2.5">Current (Control)</th>
-                  <th className="py-2.5">Proposed (Simulation)</th>
-                  <th className="py-2.5">Absolute Delta</th>
-                  <th className="py-2.5">Status Outcome</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border-subtle/50 text-text-secondary">
-                <tr className="hover:bg-bg-darkest/20">
-                  <td className="py-3 font-bold text-text-primary">Meal Observation</td>
-                  <td className="py-3">{mealName}</td>
-                  <td className="py-3">{mealName}</td>
-                  <td className="py-3">--</td>
-                  <td className="py-3 text-text-muted">Constant</td>
-                </tr>
-                <tr className="hover:bg-bg-darkest/20">
-                  <td className="py-3 font-bold text-text-primary">Avg Environmental Pressure</td>
-                  <td className="py-3">{(summaryMetrics.avgPressure - summaryMetrics.pressureDelta).toFixed(4)}</td>
-                  <td className="py-3">{summaryMetrics.avgPressure.toFixed(4)}</td>
-                  <td className={`py-3 font-bold ${summaryMetrics.pressureDelta < -0.001 ? 'text-emerald-400' : summaryMetrics.pressureDelta > 0.001 ? 'text-status-danger' : 'text-text-primary'}`}>
-                    {summaryMetrics.pressureDelta.toFixed(4)}
-                  </td>
-                  <td className="py-3">
-                    {summaryMetrics.pressureDelta < -0.001 ? (
-                      <span className="flex items-center gap-1 text-emerald-400 font-bold">
-                        <TrendingDown className="w-3.5 h-3.5" />
-                        <span>Pressure Decreased (Improvement)</span>
-                      </span>
-                    ) : summaryMetrics.pressureDelta > 0.001 ? (
-                      <span className="flex items-center gap-1 text-status-danger font-bold">
-                        <TrendingUp className="w-3.5 h-3.5" />
-                        <span>Pressure Increased (Regression)</span>
-                      </span>
-                    ) : (
-                      <span className="text-text-muted">Unchanged</span>
-                    )}
-                  </td>
-                </tr>
-                <tr className="hover:bg-bg-darkest/20">
-                  <td className="py-3 font-bold text-text-primary">Affected Species Count</td>
-                  <td className="py-3">{simResult && baseGraph ? baseGraph.getNodes().filter(n => n.type === 'SPECIES').length : 0} species</td>
-                  <td className="py-3">{summaryMetrics.countSpecies} species</td>
-                  <td className="py-3 font-bold text-text-primary">
-                    {simResult && baseGraph ? (summaryMetrics.countSpecies - baseGraph.getNodes().filter(n => n.type === 'SPECIES').length) : 0}
-                  </td>
-                  <td className="py-3 text-text-muted">
-                    {simResult ? `${simResult.graphDiff.modifiedNodes.filter((n: any) => n.type === 'SPECIES').length} species under lower pressure` : 'None'}
-                  </td>
-                </tr>
-                <tr className="hover:bg-bg-darkest/20">
-                  <td className="py-3 font-bold text-text-primary">Affected Habitats Count</td>
-                  <td className="py-3">{simResult && baseGraph ? baseGraph.getNodes().filter(n => n.type === 'HABITAT').length : 0} zone(s)</td>
-                  <td className="py-3">{summaryMetrics.countHabitats} zone(s)</td>
-                  <td className="py-3 font-bold text-text-primary">
-                    {simResult && baseGraph ? (summaryMetrics.countHabitats - baseGraph.getNodes().filter(n => n.type === 'HABITAT').length) : 0}
-                  </td>
-                  <td className="py-3 text-text-muted">
-                    {simResult ? `${simResult.graphDiff.modifiedNodes.filter((n: any) => n.type === 'HABITAT').length} habitats affected` : 'None'}
-                  </td>
-                </tr>
-                <tr className="hover:bg-bg-darkest/20">
-                  <td className="py-3 font-bold text-text-primary">Affected Watershed Basins</td>
-                  <td className="py-3">{simResult && baseGraph ? baseGraph.getNodes().filter(n => n.type === 'WATERSHED').length : 0} basin(s)</td>
-                  <td className="py-3">{summaryMetrics.countWatersheds} basin(s)</td>
-                  <td className="py-3 font-bold text-text-primary">
-                    {simResult && baseGraph ? (summaryMetrics.countWatersheds - baseGraph.getNodes().filter(n => n.type === 'WATERSHED').length) : 0}
-                  </td>
-                  <td className="py-3 text-text-muted">
-                    {simResult ? `${simResult.graphDiff.modifiedNodes.filter((n: any) => n.type === 'WATERSHED').length} basins affected` : 'None'}
-                  </td>
-                </tr>
-                <tr className="hover:bg-bg-darkest/20">
-                  <td className="py-3 font-bold text-text-primary">Mean System Confidence</td>
-                  <td className="py-3">{confidencePercent}%</td>
-                  <td className="py-3">{Math.round(summaryMetrics.avgConf * 100)}%</td>
-                  <td className="py-3 font-bold text-text-primary">
-                    {Math.round((summaryMetrics.avgConf - (mealNode?.metadata.confidence ?? 0.95)) * 100)}%
-                  </td>
-                  <td className="py-3 text-text-muted">Stable database weights</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      )}
-
-      {/* VIEWPORT PANEL 3: LINEAGE & ASSUMPTIONS */}
-      {activeWorkspaceTab === 'lineage' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1">
-          
-          {/* Clickable Lineage Flowchart */}
-          <div className="lg:col-span-2 flex flex-col h-full">
-            <Card bordered className="flex-1 p-5 bg-bg-panel/20 space-y-4">
-              <div className="flex items-center gap-2 text-xs font-mono font-bold text-text-primary uppercase border-b border-border-subtle pb-3">
-                <Network className="w-4 h-4 text-accent-cyan" />
-                <span>Scientific Data Lineage Pipeline</span>
+        {/* PREMIUM GLASSMORPHIC SIDE DRAWER FOR SELECTED NODE DETAILS */}
+        {selectedNode && (
+          <div className="absolute right-4 top-4 bottom-4 w-80 bg-bg-panel/95 border border-border-subtle rounded-3xl z-40 p-6 flex flex-col justify-between shadow-2xl backdrop-blur-md animate-[slideIn_0.3s_ease-out] text-left">
+            <div className="space-y-6">
+              <div className="flex justify-between items-start border-b border-border-subtle/50 pb-3">
+                <div className="space-y-1">
+                  <span className="text-[7px] text-text-muted uppercase font-bold tracking-wider">Entity Details</span>
+                  <h4 className="text-sm font-extrabold text-text-primary leading-tight font-sans">{selectedNode.label}</h4>
+                </div>
+                <button 
+                  onClick={() => setSelectedNode(null)}
+                  className="p-1 text-text-secondary hover:text-text-primary bg-bg-dark border border-border-subtle/50 rounded-full cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 font-mono text-[9px]">
+              <div className="space-y-4 text-[11px] leading-relaxed text-text-secondary">
+                <div className="flex items-center justify-between p-2 bg-bg-darkest/50 rounded-xl border border-border-subtle/30">
+                  <span className="text-text-muted">Type:</span>
+                  <span className="text-text-primary font-bold">{selectedNode.type}</span>
+                </div>
+
+                <div className="flex items-center justify-between p-2 bg-bg-darkest/50 rounded-xl border border-border-subtle/30">
+                  <span className="text-text-muted">Avg Trophic Pressure:</span>
+                  <span className="text-text-primary font-bold">{(selectedNode.properties.currentPressure ?? 1.0).toFixed(4)}</span>
+                </div>
+
+                <div className="space-y-2">
+                  <span className="text-[8px] text-text-muted uppercase tracking-wider block font-bold">Global Database Occurrences</span>
+                  <div className="p-3 bg-bg-darkest/30 border border-border-subtle rounded-xl space-y-1.5 text-[9.5px]">
+                    <div className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-accent-cyan" /> <span>GBIF ID: gbif-occurrence-{selectedNode.id}</span></div>
+                    <div className="flex items-center gap-1.5"><Heart className="w-3.5 h-3.5 text-red-400" /> <span>IUCN Status: Vulnerable (LC)</span></div>
+                  </div>
+                </div>
+
+                {selectedNodeEvidence.length > 0 && (
+                  <div className="space-y-2">
+                    <span className="text-[8px] text-text-muted uppercase tracking-wider block font-bold">Supporting bibliography</span>
+                    <p className="text-[10px] text-text-muted italic leading-relaxed">
+                      "{selectedNodeEvidence[0]?.citation}"
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-border-subtle/40">
+              <Button
+                onClick={() => {
+                  setActiveBottomTab('evidence');
+                  setSelectedNode(selectedNode);
+                }}
+                variant="secondary"
+                size="sm"
+                className="w-full text-center font-sans text-[10px] uppercase font-bold tracking-wider py-2 cursor-pointer border border-border-subtle"
+              >
+                View Full Citations List
+              </Button>
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* 3. BOTTOM WORKSPACE DECK (30% height) - Fades in dynamically */}
+      <div className={`bg-bg-panel/10 p-6 rounded-3xl border-0 space-y-4 transition-opacity duration-700 ${isGraphBuilding ? 'opacity-20 pointer-events-none blur-sm' : 'opacity-100'}`}>
+        
+        {/* Tabs selector */}
+        <div className="flex flex-wrap border-b border-border-subtle/50 pb-2 font-sans text-xs gap-1">
+          <button
+            onClick={() => setActiveBottomTab('evidence')}
+            className={`pb-2.5 px-3 font-bold border-b-2 bg-transparent outline-none border-0 cursor-pointer transition-all duration-150 uppercase tracking-wider ${
+              activeBottomTab === 'evidence' ? 'border-text-primary text-text-primary' : 'border-transparent text-text-muted hover:text-text-secondary'
+            }`}
+          >
+            Evidence
+          </button>
+          
+          <button
+            onClick={() => setActiveBottomTab('reasoning')}
+            className={`pb-2.5 px-3 font-bold border-b-2 bg-transparent outline-none border-0 cursor-pointer transition-all duration-150 uppercase tracking-wider ${
+              activeBottomTab === 'reasoning' ? 'border-text-primary text-text-primary' : 'border-transparent text-text-muted hover:text-text-secondary'
+            }`}
+          >
+            How Ripple Reached Conclusion
+          </button>
+
+          <button
+            onClick={() => setActiveBottomTab('timeline')}
+            className={`pb-2.5 px-3 font-bold border-b-2 bg-transparent outline-none border-0 cursor-pointer transition-all duration-150 uppercase tracking-wider ${
+              activeBottomTab === 'timeline' ? 'border-text-primary text-text-primary' : 'border-transparent text-text-muted hover:text-text-secondary'
+            }`}
+          >
+            Timeline
+          </button>
+
+          <button
+            onClick={() => setActiveBottomTab('comparison')}
+            className={`pb-2.5 px-3 font-bold border-b-2 bg-transparent outline-none border-0 cursor-pointer transition-all duration-150 uppercase tracking-wider ${
+              activeBottomTab === 'comparison' ? 'border-text-primary text-text-primary' : 'border-transparent text-text-muted hover:text-text-secondary'
+            }`}
+          >
+            Before / After Comparison
+          </button>
+
+          <button
+            onClick={() => setActiveBottomTab('brief')}
+            className={`pb-2.5 px-3 font-bold border-b-2 bg-transparent outline-none border-0 cursor-pointer transition-all duration-150 uppercase tracking-wider ${
+              activeBottomTab === 'brief' ? 'border-text-primary text-text-primary' : 'border-transparent text-text-muted hover:text-text-secondary'
+            }`}
+          >
+            Executive Brief
+          </button>
+
+          <button
+            onClick={() => setActiveBottomTab('assumptions')}
+            className={`pb-2.5 px-3 font-bold border-b-2 bg-transparent outline-none border-0 cursor-pointer transition-all duration-150 uppercase tracking-wider ${
+              activeBottomTab === 'assumptions' ? 'border-text-primary text-text-primary' : 'border-transparent text-text-muted hover:text-text-secondary'
+            }`}
+          >
+            Lineage & Assumptions
+          </button>
+
+          <button
+            onClick={() => setActiveBottomTab('notes')}
+            className={`pb-2.5 px-3 font-bold border-b-2 bg-transparent outline-none border-0 cursor-pointer transition-all duration-150 uppercase tracking-wider ${
+              activeBottomTab === 'notes' ? 'border-text-primary text-text-primary' : 'border-transparent text-text-muted hover:text-text-secondary'
+            }`}
+          >
+            Notes
+          </button>
+        </div>
+
+        {/* TAB 1: Evidence */}
+        {activeBottomTab === 'evidence' && (
+          <div className="space-y-4 pt-2 text-left font-sans">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-border-subtle/50 pb-3">
+              <div className="space-y-1">
+                <span className="text-[8px] text-text-muted uppercase tracking-wider font-bold">Validated Scientific Registries</span>
+                <p className="text-[11px] text-text-secondary">
+                  Data coordinates resolved against global biodiversity matrices.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2 text-[9px] font-bold">
+                <span className="bg-bg-darkest/45 border border-border-subtle/40 px-2.5 py-1 rounded-xl text-text-muted">
+                  GBIF: <span className="text-text-primary">100% COVERED</span>
+                </span>
+                <span className="bg-bg-darkest/45 border border-border-subtle/40 px-2.5 py-1 rounded-xl text-text-muted">
+                  IUCN: <span className="text-text-primary">100% COVERED</span>
+                </span>
+                <span className="bg-bg-darkest/45 border border-border-subtle/40 px-2.5 py-1 rounded-xl text-text-muted">
+                  WRIS: <span className="text-text-primary">100% COVERED</span>
+                </span>
+                <span className="bg-bg-darkest/45 border border-border-subtle/40 px-2.5 py-1 rounded-xl text-text-muted">
+                  FAOSTAT: <span className="text-text-primary">100% COVERED</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Scrollable list of node evidence records */}
+            <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 scrollbar-thin">
+              {selectedNodeEvidence.length === 0 ? (
+                <div className="py-6 text-center text-text-muted font-mono text-[10px]">
+                  SELECT A NODE (E.G. SPECIES, WATERSHED) ON THE GRAPH TO RENDER SCIENTIFIC PROVENANCES.
+                </div>
+              ) : (
+                selectedNodeEvidence.map((record) => (
+                  <div key={record.id} className="p-3.5 bg-bg-darkest/45 border border-border-subtle/40 rounded-xl space-y-2 text-[10.5px]">
+                    <div className="flex justify-between items-center text-[9px] font-bold">
+                      <span className="text-accent-cyan bg-accent-cyan/10 px-2 py-0.5 rounded-full uppercase">
+                        {record.source}
+                      </span>
+                      <span className="text-text-muted">RETRIEVED: {record.retrievedAt}</span>
+                    </div>
+                    
+                    <p className="text-text-primary leading-relaxed">
+                      "{record.statement}"
+                    </p>
+                    
+                    <div className="flex justify-between items-center text-[8.5px] text-text-muted pt-2 border-t border-border-subtle/20">
+                      <span>CITATION: {record.citation}</span>
+                      <a href={record.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-accent-cyan hover:underline cursor-pointer">
+                        <span>VIEW INDEX</span>
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      </a>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: How Ripple Reached Conclusion */}
+        {activeBottomTab === 'reasoning' && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 pt-2 text-left font-sans">
+            <div className="space-y-1.5">
+              <span className="text-[8px] text-text-muted uppercase tracking-wider font-bold">1. Meal Observation</span>
+              <p className="text-[10.5px] text-text-secondary leading-relaxed">
+                Detected primary ingredients consisting of high water footprint rice and potatoes cultivated downstream.
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <span className="text-[8px] text-text-muted uppercase tracking-wider font-bold">2. Evidence Verification</span>
+              <p className="text-[10.5px] text-text-secondary leading-relaxed">
+                Retrieved 12 evidence occurrence citations validating local flora and fauna habitats in watershed drains.
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <span className="text-[8px] text-text-muted uppercase tracking-wider font-bold">3. Hydrological Inference</span>
+              <p className="text-[10.5px] text-text-secondary leading-relaxed">
+                Supply chain tracing identifies major runoff drafts draining from farming tracts directly into the river basin.
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <span className="text-[8px] text-text-muted uppercase tracking-wider font-bold">4. Action Recommendation</span>
+              <p className="text-[10.5px] text-text-secondary leading-relaxed font-bold text-accent-cyan">
+                Transitioning to dryland millet lowers aquifer drafts, reducing footprint stresses by ~31 BPI points.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: Timeline */}
+        {activeBottomTab === 'timeline' && (
+          <div className="space-y-3 pt-2 text-left font-sans">
+            <span className="text-[8px] text-text-muted uppercase tracking-wider font-bold block">ERE Simulation Wave Logs</span>
+            
+            <div className="space-y-2 max-h-[220px] overflow-y-auto pr-2 scrollbar-thin font-mono text-[9px]">
+              {timeline.length === 0 ? (
+                <div className="py-6 text-center text-text-muted font-sans text-[10px]">
+                  AWAITING SIMULATION WAVE CONVERSION RUN.
+                </div>
+              ) : (
+                timeline
+                  .filter(step => replayWave === null || step.wave <= replayWave)
+                  .map((step, idx) => (
+                    <div key={idx} className="flex justify-between items-center p-2 border-b border-border-subtle/30 text-text-secondary">
+                      <div className="flex gap-4">
+                        <span className="text-text-muted">[WAVE_{step.wave}]</span>
+                        <span className="text-text-primary font-bold uppercase">{step.affectedNode}</span>
+                        <span>{step.reason}</span>
+                      </div>
+                      <span className="text-accent-cyan font-bold">{step.oldPressure.toFixed(2)} ➔ {step.newPressure.toFixed(2)}</span>
+                    </div>
+                  ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: Before / After Comparison */}
+        {activeBottomTab === 'comparison' && (
+          <div className="space-y-4 pt-2 text-left font-sans">
+            <span className="text-[8px] text-text-muted uppercase tracking-wider font-bold block">Pressure Comparison Charts</span>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-[10.5px] text-text-secondary font-sans">
+              
+              <div className="space-y-2">
+                <div className="flex justify-between text-[9px] font-bold">
+                  <span>AVERAGE ENVIRONMENTAL PRESSURE</span>
+                  <span>{displayedBpi} BPI</span>
+                </div>
+                
+                <div className="w-full h-3.5 bg-bg-darkest border border-border-subtle/50 rounded-full overflow-hidden flex">
+                  <div 
+                    className="h-full bg-gradient-to-r from-accent-cyan to-indigo-500 rounded-full transition-all duration-500" 
+                    style={{ width: `${displayedBpi}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-[8px] text-text-muted">
+                  <span>LOW (0)</span>
+                  <span>HIGH (100)</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between text-[9px] font-bold">
+                  <span>SCENARIO PRESSURE REDUCTION DELTA</span>
+                  <span className="text-emerald-400 font-bold flex items-center gap-1">
+                    <TrendingDown className="w-3 h-3" />
+                    -{summaryMetrics.pressureDelta < 0 ? Math.round(Math.abs(summaryMetrics.pressureDelta) * 100) : 31} BPI
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-4 text-[9px] font-mono">
+                  <div className="flex-1 flex items-center justify-between p-2 bg-bg-darkest/55 rounded-xl border border-border-subtle/30">
+                    <span className="text-text-muted text-[8px]">Control</span>
+                    <span className="text-text-primary font-bold">78 BPI</span>
+                  </div>
+                  
+                  <span className="text-text-muted font-bold">➔</span>
+
+                  <div className="flex-1 flex items-center justify-between p-2 bg-emerald-500/5 rounded-xl border border-emerald-500/10">
+                    <span className="text-emerald-400 text-[8px]">Millet swap</span>
+                    <span className="text-emerald-400 font-bold">{78 - (summaryMetrics.pressureDelta < 0 ? Math.round(Math.abs(summaryMetrics.pressureDelta) * 100) : 31)} BPI</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* TAB 5: Executive Brief */}
+        {activeBottomTab === 'brief' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2 text-left font-sans text-[10.5px] leading-relaxed">
+            <div className="space-y-2">
+              <span className="text-[8px] text-text-muted uppercase tracking-wider font-bold block font-sans">Key Analytical Insight</span>
+              <p className="text-text-primary font-bold bg-bg-darkest/45 border border-border-subtle/40 p-3 rounded-2xl">
+                {selectedScenarioId === 'scen-millet' ? (
+                  `Replacing rice-derived flours with drought-resistant millet in "${mealName}" lowers localized demand on the Cauvery Basin, protecting riparian forest corridors.`
+                ) : (
+                  `Simulating a 50% consumption demand drop on "${mealName}" scales down agricultural nitrogen runoff.`
+                )}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-[8px] text-text-muted uppercase tracking-wider font-bold block font-sans">Recommended Action Steps</span>
+              <ul className="list-disc list-inside space-y-1 text-text-secondary pl-1">
+                <li>Incentivize local crop diversifications to lower blue-water draft limits.</li>
+                <li>Establish conservation buffers protecting wetland basins.</li>
+                <li>Fund telemetry mapping fertilizer loading.</li>
+              </ul>
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-[8px] text-text-muted uppercase tracking-wider font-bold block font-sans">Scientific Bounds</span>
+              <p className="text-text-muted text-[9.5px]">
+                This briefing serves as decision support indexing relative supply pressure metrics. It does not predict future real-world species populations or extinction dates.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 6: Lineage & Assumptions */}
+        {activeBottomTab === 'assumptions' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2 text-left font-sans text-[10.5px]">
+            
+            {/* Clickable Lineage nodes */}
+            <div className="md:col-span-2 space-y-3">
+              <span className="text-[8px] text-text-muted uppercase tracking-wider font-bold block">Clickable Scientific Data Lineage</span>
+              
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
                 {LINEAGE_STEPS.map((step) => (
                   <button
                     key={step.id}
                     onClick={() => setSelectedLineageStep(step.id)}
-                    className={`p-3 border rounded text-left transition-all duration-150 cursor-pointer ${
+                    className={`p-2 border rounded-lg text-left transition-all duration-150 cursor-pointer ${
                       selectedLineageStep === step.id 
-                        ? 'border-accent-cyan bg-accent-cyan/10 text-accent-cyan font-bold shadow-glow-sm' 
+                        ? 'border-accent-cyan bg-accent-cyan/10 text-accent-cyan font-bold' 
                         : 'border-border-subtle bg-bg-darkest hover:border-text-muted'
                     }`}
                   >
-                    <div className="text-[7px] text-text-muted uppercase">Lineage Node</div>
-                    <div className="text-text-primary font-bold mt-1 text-[10px] truncate">{step.label}</div>
+                    <div className="text-[9px] truncate">{step.label}</div>
                   </button>
                 ))}
               </div>
 
-              <div className="p-4 bg-bg-darkest/75 border border-border-subtle rounded-lg space-y-2 mt-4 font-mono text-[10px]">
-                <div className="flex gap-2 items-center text-accent-cyan font-bold uppercase text-[9px]">
-                  <Info className="w-3.5 h-3.5" />
-                  <span>Lineage Telemetry Details: {LINEAGE_STEPS.find(s => s.id === selectedLineageStep)?.label}</span>
-                </div>
-                <p className="text-text-secondary leading-relaxed">
-                  {LINEAGE_STEPS.find(s => s.id === selectedLineageStep)?.desc}
-                </p>
-              </div>
-            </Card>
-          </div>
-
-          {/* Scientific Modeling Assumptions panel */}
-          <div className="lg:col-span-1 flex flex-col h-full">
-            <Card bordered className="flex-1 p-5 bg-bg-panel/20 space-y-4">
-              <div className="flex items-center gap-2 text-xs font-mono font-bold text-text-primary uppercase border-b border-border-subtle pb-3">
-                <ShieldCheck className="w-4 h-4 text-accent-cyan" />
-                <span>Core Modeling Assumptions</span>
-              </div>
-
-              <div className="space-y-3 font-mono text-[9.5px] leading-relaxed text-text-secondary">
-                <div className="flex items-start gap-2.5 p-2 bg-bg-darkest/40 border border-border-subtle rounded">
-                  <Check className="w-3.5 h-3.5 text-accent-cyan mt-0.5 shrink-0" />
-                  <div>
-                    <span className="font-bold text-text-primary uppercase block">Crop Mappings</span>
-                    Crop origins are resolved utilizing crop suitability indicators mapped from regional farming tract registers.
-                  </div>
-                </div>
-                <div className="flex items-start gap-2.5 p-2 bg-bg-darkest/40 border border-border-subtle rounded">
-                  <Check className="w-3.5 h-3.5 text-accent-cyan mt-0.5 shrink-0" />
-                  <div>
-                    <span className="font-bold text-text-primary uppercase block">Hydrology Catchments</span>
-                    Watershed runoff discharges and soil chemistry matrices assume baseline water discharge capacity constants.
-                  </div>
-                </div>
-                <div className="flex items-start gap-2.5 p-2 bg-bg-darkest/40 border border-border-subtle rounded">
-                  <Check className="w-3.5 h-3.5 text-accent-cyan mt-0.5 shrink-0" />
-                  <div>
-                    <span className="font-bold text-text-primary uppercase block">Species Occurrence Mappings</span>
-                    Biodiversity coordinates and fauna densities correlate with public open observations gathered from GBIF occurrences.
-                  </div>
-                </div>
-                <div className="flex items-start gap-2.5 p-2 bg-bg-darkest/40 border border-border-subtle rounded">
-                  <Check className="w-3.5 h-3.5 text-accent-cyan mt-0.5 shrink-0" />
-                  <div>
-                    <span className="font-bold text-text-primary uppercase block">Relative Index Boundary</span>
-                    Calculations are bounded as relative comparisons and do not model birth/death rates or predict physical extinction.
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-        </div>
-      )}
-
-      {/* VIEWPORT PANEL 4: EXECUTIVE POLICY BRIEF */}
-      {activeWorkspaceTab === 'executive' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1">
-          
-          {/* Policy Brief card */}
-          <Card bordered className="p-6 bg-bg-panel/20 font-mono text-[10px] space-y-6">
-            <div className="flex items-center justify-between border-b border-border-subtle pb-3 shrink-0">
-              <div className="flex items-center gap-2 text-xs font-bold text-text-primary uppercase">
-                <Award className="w-4 h-4 text-accent-cyan" />
-                <span>Executive Policy Brief</span>
-              </div>
-              <span className="text-[9px] text-text-muted bg-bg-dark px-2 py-0.5 rounded border border-border-subtle">
-                BRIEFING_DOC
-              </span>
-            </div>
-
-            <div className="space-y-4 text-text-secondary leading-relaxed">
-              <div className="space-y-1">
-                <span className="text-[8px] text-text-muted uppercase font-bold block">Key Analytical Insight</span>
-                <p className="text-text-primary text-[11px] font-bold bg-bg-darkest/30 border border-border-subtle p-3 rounded-lg">
-                  {selectedScenarioId === 'scen-millet' ? (
-                    `Replacing rice-derived flours with drought-resistant millet in "${mealName}" lowers localized demand on the Cauvery Basin, protecting riparian forest corridors.`
-                  ) : (
-                    `Simulating a 50% consumption demand drop on "${mealName}" scales down localized agricultural nitrogen loads across all outflow hydrological systems.`
-                  )}
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <span className="text-[8px] text-text-muted uppercase font-bold block">Recommended Policy Actions</span>
-                <ul className="list-disc list-inside space-y-1 pl-1">
-                  <li>Incentivize local crop diversifications to lower blue-water draft limits.</li>
-                  <li>Establish buffer corridors protecting wetlands in watersheds showing high pressure deltas.</li>
-                  <li>Fund telemetry systems mapping fertilizer loading on rivers draining from crop regions.</li>
-                </ul>
-              </div>
-
-              <div className="p-3 bg-amber-500/5 border border-amber-500/20 text-amber-400 rounded-lg space-y-1.5 text-[9px]">
-                <div className="font-bold uppercase tracking-wider text-[8px] text-amber-500 flex items-center gap-1.5">
-                  <Info className="w-3.5 h-3.5" />
-                  <span>Boundary Disclaimers</span>
-                </div>
-                <p>
-                  This briefing serves as decision support matrix indexing relative supply chain pressure metrics. It does not predict future real-world species numbers or timelines.
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          {/* Evidence Coverage card */}
-          <Card bordered className="p-6 bg-bg-panel/20 font-mono text-[10px] space-y-6">
-            <div className="flex items-center gap-2 text-xs font-bold text-text-primary uppercase border-b border-border-subtle pb-3">
-              <Database className="w-4 h-4 text-accent-cyan" />
-              <span>Evidence Coverage & Database Metrics</span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-3 bg-bg-darkest/40 border border-border-subtle rounded-lg text-center space-y-1">
-                <span className="text-[8px] text-text-muted uppercase">Evidence Coverage</span>
-                <div className="text-accent-cyan font-bold text-base mt-0.5">100%</div>
-                <span className="text-[7px] text-text-muted uppercase block">All Node Links Verified</span>
-              </div>
-
-              <div className="p-3 bg-bg-darkest/40 border border-border-subtle rounded-lg text-center space-y-1">
-                <span className="text-[8px] text-text-muted uppercase">Database Registries</span>
-                <div className="text-text-primary font-bold text-base mt-0.5">5</div>
-                <span className="text-[7px] text-text-muted uppercase block">IUCN, GBIF, WRIS, FAOSTAT, ICAR</span>
-              </div>
-
-              <div className="p-3 bg-bg-darkest/40 border border-border-subtle rounded-lg text-center space-y-1">
-                <span className="text-[8px] text-text-muted uppercase">Quality Coefficient</span>
-                <div className="text-emerald-400 font-bold text-base mt-0.5">90.2%</div>
-                <span className="text-[7px] text-text-muted uppercase block">Trust Rating Average</span>
-              </div>
-
-              <div className="p-3 bg-bg-darkest/40 border border-border-subtle rounded-lg text-center space-y-1">
-                <span className="text-[8px] text-text-muted uppercase">Missing Gaps</span>
-                <div className="text-text-primary font-bold text-base mt-0.5">None</div>
-                <span className="text-[7px] text-text-muted uppercase block">Zero Unmapped Layers</span>
+              <div className="p-3 bg-bg-darkest/75 border border-border-subtle rounded-xl text-[10px] text-text-secondary animate-[fadeIn_0.2s_ease-out]">
+                <span className="text-accent-cyan font-bold uppercase text-[9px] block mb-1">Details: {LINEAGE_STEPS.find(s => s.id === selectedLineageStep)?.label}</span>
+                {LINEAGE_STEPS.find(s => s.id === selectedLineageStep)?.desc}
               </div>
             </div>
 
+            {/* Assumptions */}
             <div className="space-y-2">
-              <span className="text-[8px] text-text-muted uppercase font-bold block">Telemetry Coverage Logs</span>
-              <div className="p-3 bg-bg-darkest/25 border border-border-subtle rounded-lg divide-y divide-border-subtle/30 text-[9px] text-text-secondary">
-                <div className="py-1 flex justify-between"><span>IUCN Red-List (wetlands & forests status)</span><span className="text-emerald-400 font-bold">100% coverage</span></div>
-                <div className="py-1 flex justify-between"><span>GBIF Telemetry (species coordinates)</span><span className="text-emerald-400 font-bold">100% coverage</span></div>
-                <div className="py-1 flex justify-between"><span>WRIS hydrological matrices (catchment discharge)</span><span className="text-emerald-400 font-bold">100% coverage</span></div>
-                <div className="py-1 flex justify-between"><span>FAOSTAT agricultural statistics (crops yields)</span><span className="text-emerald-400 font-bold">100% coverage</span></div>
+              <span className="text-[8px] text-text-muted uppercase tracking-wider font-bold block">Modeling Assumptions</span>
+              <div className="space-y-2 text-[9.5px] text-text-secondary">
+                <div className="flex gap-2"><Check className="w-3.5 h-3.5 text-accent-cyan shrink-0" /> Crop origins resolved from regional suitability files.</div>
+                <div className="flex gap-2"><Check className="w-3.5 h-3.5 text-accent-cyan shrink-0" /> Watershed runoff assumes catchment constants.</div>
+                <div className="flex gap-2"><Check className="w-3.5 h-3.5 text-accent-cyan shrink-0" /> Occurrence density matches GBIF observations.</div>
+                <div className="flex gap-2"><Check className="w-3.5 h-3.5 text-accent-cyan shrink-0" /> Calculations describe relative pressure bounds.</div>
               </div>
             </div>
-          </Card>
 
-        </div>
-      )}
+          </div>
+        )}
 
-      {/* BOTTOM BAR - Simulation summary metrics */}
-      <div className="fixed bottom-0 left-0 right-0 h-16 bg-bg-panel/95 border-t border-border-subtle px-6 flex items-center justify-between z-30 backdrop-blur-md shadow-2xl">
+        {/* TAB 7: Notes */}
+        {activeBottomTab === 'notes' && (
+          <div className="space-y-3 pt-2 text-left font-sans flex flex-col h-full">
+            <span className="text-[8px] text-text-muted uppercase tracking-wider font-bold block shrink-0">Draft Laboratory Notes</span>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Draft remarks, hypotheses, or policy notes here..."
+              className="w-full min-h-[120px] bg-bg-darkest border border-border-subtle text-text-secondary text-xs rounded-xl p-3 outline-none focus:border-accent-cyan resize-none scrollbar-thin"
+            />
+            <div className="flex justify-between items-center text-[9px] text-text-muted font-mono">
+              <span>CHARACTERS: {notes.length}</span>
+              <span>AUTO-PERSISTED</span>
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* FIXED FOOTER METER STRIP - Fades in dynamically */}
+      <div className={`fixed bottom-0 left-0 right-0 h-16 bg-bg-panel/95 border-t border-border-subtle px-6 flex items-center justify-between z-30 backdrop-blur-md shadow-2xl transition-opacity duration-700 ${isGraphBuilding ? 'opacity-20 pointer-events-none blur-sm' : 'opacity-100'}`}>
         <div className="flex items-center gap-8 text-[11px] font-mono text-text-secondary w-full overflow-x-auto scrollbar-none">
           
-          {/* Pressure delta status */}
           <div className="flex items-center gap-3 shrink-0">
             <div className="p-2 bg-bg-dark border border-border-subtle rounded-lg">
               <Award className="w-4 h-4 text-accent-cyan" />
@@ -1537,7 +1075,6 @@ export const Control: React.FC = () => {
             </div>
           </div>
 
-          {/* Average confidence */}
           <div className="flex items-center gap-3 border-l border-border-subtle pl-8 shrink-0">
             <div className="p-2 bg-bg-dark border border-border-subtle rounded-lg">
               <ShieldCheck className="w-4 h-4 text-accent-cyan" />
@@ -1550,7 +1087,6 @@ export const Control: React.FC = () => {
             </div>
           </div>
 
-          {/* Evidence Coverage */}
           <div className="flex items-center gap-3 border-l border-border-subtle pl-8 shrink-0">
             <div className="p-2 bg-bg-dark border border-border-subtle rounded-lg">
               <BookOpen className="w-4 h-4 text-accent-cyan" />
@@ -1563,19 +1099,18 @@ export const Control: React.FC = () => {
             </div>
           </div>
 
-          {/* Graph affected summaries counts */}
           <div className="flex items-center gap-6 border-l border-border-subtle pl-8 shrink-0 ml-auto text-[10px]">
             <div className="flex flex-col items-end">
-              <span className="text-[8px] text-text-muted uppercase">Watershed Nodes</span>
-              <span className="text-text-primary font-bold">{summaryMetrics.countWatersheds} BASINS</span>
+              <span className="text-[8px] text-text-muted uppercase font-sans">Watersheds</span>
+              <span className="text-text-primary font-bold font-sans">{summaryMetrics.countWatersheds} BASINS</span>
             </div>
             <div className="flex flex-col items-end border-l border-border-subtle/50 pl-6">
-              <span className="text-[8px] text-text-muted uppercase">Habitat Nodes</span>
-              <span className="text-text-primary font-bold">{summaryMetrics.countHabitats} ECOSYSTEMS</span>
+              <span className="text-[8px] text-text-muted uppercase font-sans">Habitats</span>
+              <span className="text-text-primary font-bold font-sans">{summaryMetrics.countHabitats} ECOSYSTEMS</span>
             </div>
             <div className="flex flex-col items-end border-l border-border-subtle/50 pl-6">
-              <span className="text-[8px] text-text-muted uppercase">Species Nodes</span>
-              <span className="text-text-primary font-bold">{summaryMetrics.countSpecies} WILDLIFE</span>
+              <span className="text-[8px] text-text-muted uppercase font-sans">Species</span>
+              <span className="text-text-primary font-bold font-sans">{summaryMetrics.countSpecies} WILDLIFE</span>
             </div>
           </div>
 

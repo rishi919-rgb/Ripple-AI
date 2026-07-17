@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { 
+  Home,
   Compass, 
-  FlaskConical, 
   BookOpen, 
   HelpCircle, 
   Settings, 
@@ -22,10 +22,10 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
   const location = useLocation();
 
   const navigation: SidebarItem[] = [
-    { name: 'Experiment', path: '/experiment', icon: <Compass className="w-5 h-5" /> },
-    { name: 'Lab', path: '/lab', icon: <FlaskConical className="w-5 h-5" /> },
-    { name: 'Notebook', path: '/notebook', icon: <BookOpen className="w-5 h-5" /> },
-    { name: 'Explain', path: '/explain', icon: <HelpCircle className="w-5 h-5" /> },
+    { name: 'Home', path: '/', icon: <Home className="w-5 h-5" /> },
+    { name: 'Experiments', path: '/workspace', icon: <Compass className="w-5 h-5" /> },
+    { name: 'Journal', path: '/journal', icon: <BookOpen className="w-5 h-5" /> },
+    { name: 'Knowledge', path: '/knowledge', icon: <HelpCircle className="w-5 h-5" /> },
     { name: 'Settings', path: '/settings', icon: <Settings className="w-5 h-5" /> },
   ];
 

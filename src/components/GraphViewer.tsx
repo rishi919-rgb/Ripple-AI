@@ -159,7 +159,7 @@ export const GraphViewer: React.FC<GraphViewerProps> = ({
   };
 
   return (
-    <div className="relative w-full h-[650px] bg-bg-darkest/60 border border-border-subtle rounded-xl overflow-hidden select-none">
+    <div className="relative w-full h-[580px] bg-transparent overflow-hidden select-none">
       {/* Pan & Zoom Controls floating widget */}
       <div className="absolute top-4 left-4 z-20 flex flex-col gap-1.5 bg-bg-panel/90 border border-border-subtle p-1.5 rounded-lg shadow-xl backdrop-blur-md">
         <button 
@@ -321,9 +321,9 @@ export const GraphViewer: React.FC<GraphViewerProps> = ({
                       textAnchor="middle"
                       fill={isSelected ? '#22d3ee' : isHovered ? '#ffffff' : '#a1a1aa'}
                       fontSize="9px"
-                      fontFamily="monospace"
+                      fontFamily="sans-serif"
                       fontWeight={isSelected ? 'bold' : 'normal'}
-                      className="transition-colors duration-200 pointer-events-none select-none bg-black"
+                      className="transition-colors duration-200 pointer-events-none select-none"
                     >
                       {node.label}
                     </text>

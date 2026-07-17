@@ -3,15 +3,10 @@ import { AppProviders } from '@/providers';
 import { AppLayout } from '@/components';
 import { 
   Home, 
-  Experiment, 
-  Lab, 
-  Observations, 
-  Explain, 
-  Notebook, 
   Settings,
   Workspace,
-  Discovery,
-  Control
+  Journal,
+  Knowledge
 } from '@/pages';
 
 function App() {
@@ -21,15 +16,10 @@ function App() {
         <AppLayout>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/experiment" element={<Experiment />} />
-            <Route path="/lab" element={<Lab />} />
-            <Route path="/observations" element={<Observations />} />
-            <Route path="/explain" element={<Explain />} />
-            <Route path="/notebook" element={<Notebook />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/workspace" element={<Workspace />} />
-            <Route path="/discovery" element={<Discovery />} />
-            <Route path="/control" element={<Control />} />
+            <Route path="/journal" element={<Journal />} />
+            <Route path="/knowledge" element={<Knowledge />} />
           </Routes>
         </AppLayout>
       </BrowserRouter>

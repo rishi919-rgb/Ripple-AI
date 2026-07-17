@@ -1,10 +1,5 @@
 export { default as Home } from './Home';
-export { default as Experiment } from './Experiment';
-export { default as Lab } from './Lab';
-export { default as Observations } from './Observations';
-export { default as Explain } from './Explain';
-export { default as Notebook } from './Notebook';
 export { default as Settings } from './Settings';
 export { default as Workspace } from './Workspace';
-export { default as Discovery } from './Discovery';
-export { default as Control } from './Control';
+export { default as Journal } from './Journal';
+export { default as Knowledge } from './Knowledge';
